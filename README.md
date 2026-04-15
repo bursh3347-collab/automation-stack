@@ -1,17 +1,19 @@
-# 🔄 automation-stack
+[English](README.md) | [中文](README_CN.md)
 
-> ⭐ Maturity: **L1 Growing** — 7个TOP项目已分析，横向对比+最佳实践已完成
+# 🤖 automation-stack
 
-从GitHub全域自动化/爬虫/工作流高星项目中，拆解精华、提炼最佳实践、横向对比选型。
+![Stars](https://img.shields.io/github/stars/bursh3347-collab/automation-stack?style=flat-square)
+![License](https://img.shields.io/github/license/bursh3347-collab/automation-stack?style=flat-square)
+![Last Commit](https://img.shields.io/github/last-commit/bursh3347-collab/automation-stack?style=flat-square)
 
-**TEMC评分体系** | **天工·代码猎手自动化产出** | **Apache-2.0**
+> ⭐ Maturity: **L1 Growing** — 7 top projects analyzed, horizontal comparison + best practices complete.
 
----
+Extracted best practices, workflow patterns, and deep analysis from **7 high-star automation & web scraping tools** on GitHub. Each project is scored using our [TEMC methodology](#temc-scoring) (Technology × Ecosystem × Market × Combo).
 
-## 📈 本分类飙升榜（最近更新：2026-04-15）
+## 📈 Trending Board (Updated: 2026-04-15)
 
-| 排名 | 项目 | 总Stars | TEMC | 趋势 |
-|------|------|---------|------|------|
+| Rank | Project | Stars | TEMC | Trend |
+|------|---------|-------|------|-------|
 | 1 | n8n | 184k | 89 | 🚀 |
 | 2 | Firecrawl | 109k | 89 | 🚀 |
 | 3 | Puppeteer | 90k | 82 | → |
@@ -20,44 +22,74 @@
 | 6 | Selenium | 34k | 67 | ↓ |
 | 7 | Crawlee | 22.8k | 83 | ↑ |
 
-## 📂 仓库结构
+## 📋 What's Inside
+
+### Projects Analyzed (7)
+
+| Project | Stars | TEMC | Language | Category |
+|---------|-------|------|----------|----------|
+| [Playwright](projects/playwright.md) | 86.5k | **90** 🏆 | TypeScript | Cross-browser Automation |
+| [Firecrawl](projects/firecrawl.md) | 109k | **89** 🏆 | TypeScript | AI-powered Web Scraping |
+| [n8n](projects/n8n.md) | 184k | **89** 🏆 | TypeScript | Workflow Automation |
+| [Crawlee](projects/crawlee.md) | 22.8k | **83** | TypeScript | Web Crawling Library |
+| [Puppeteer](projects/puppeteer.md) | 90k | **82** | TypeScript | Chrome Automation |
+| [Scrapy](projects/scrapy.md) | 61.3k | **74** | Python | Web Scraping Framework |
+| [Selenium](projects/selenium.md) | 34k | **67** | Multi | Browser Automation (Legacy) |
+
+### Comparison & Best Practices
+
+- [📊 Automation Tools Comparison](comparison.md) — Full horizontal comparison
+- [🕷️ Scraping Patterns](best-practices/scraping-patterns.md) — Anti-detection, retry, proxy rotation
+- [⚙️ Workflow Automation](best-practices/workflow-automation.md) — Event-driven patterns, error handling
+
+## 🎯 Quick Picks for Solo Developers
+
+Based on a TypeScript + Next.js + Supabase + Vercel stack:
+
+| Use Case | Pick | Why |
+|----------|------|-----|
+| AI Agent browser control | **Playwright** | TypeScript-native + @playwright/mcp |
+| AI data extraction | **Firecrawl** | HTML→Markdown + LLM Extract API |
+| Workflow automation | **n8n** | 400+ integrations + AI nodes + MCP |
+| Production-grade scraping | **Crawlee** | TypeScript + Apache-2.0 |
+| PDF/screenshot service | **Puppeteer** | Best Chrome-native capabilities |
+
+## 🏗️ Repository Structure
 
 ```
 automation-stack/
-├── README.md              ← 你在这里
-├── projects/              ← 7个高星项目的TEMC分析
-│   ├── playwright.md      ← 🏆 TEMC 90 — TypeScript跨浏览器自动化
-│   ├── firecrawl.md       ← 🏆 TEMC 89 — AI驱动Web数据采集
-│   ├── n8n.md             ← 🏆 TEMC 89 — 工作流自动化平台
-│   ├── crawlee.md         ← TEMC 83 — TypeScript原生爬虫库
-│   ├── puppeteer.md       ← TEMC 82 — Chrome自动化
-│   ├── scrapy.md          ← TEMC 74 — Python爬虫框架
-│   └── selenium.md        ← TEMC 67 — Web自动化经典
-├── best-practices/        ← 从多个项目中提炼的最佳实践
-│   ├── scraping-patterns.md   ← 爬虫设计模式
-│   └── workflow-automation.md ← 工作流自动化模式
-├── code/                  ← 精华代码提取（待填充）
-├── comparison.md          ← 7个项目横向对比表
-└── SOURCES.md             ← 所有来源清单
+├── README.md              ← You are here
+├── README_CN.md           ← 中文版
+├── projects/              ← 7 project analyses (TEMC scored)
+├── best-practices/        ← Cross-project patterns
+├── code/                  ← Extracted code (coming in L2)
+├── comparison.md          ← Horizontal comparison table
+└── SOURCES.md             ← All source links + licenses
 ```
 
-## 🎯 天子快速选型
+## <a id="temc-scoring"></a>📊 TEMC Scoring
 
-基于天子基准技术栈（TypeScript + Next.js + Supabase + Vercel）：
+**TEMC** = Technology × 0.25 + Ecosystem × 0.20 + Market × 0.30 + Combo × 0.25
 
-| 场景 | 首选 | 理由 |
-|------|------|------|
-| AI Agent浏览器操控 | **Playwright** | TypeScript原生 + @playwright/mcp |
-| AI数据采集 | **Firecrawl** | HTML→Markdown + LLM Extract |
-| 工作流自动化 | **n8n** | 400+集成 + AI节点 + MCP |
-| 生产级爬虫 | **Crawlee** | TypeScript + Apache-2.0 |
-| PDF/截图服务 | **Puppeteer** | Chrome原生能力最强 |
+- **T (Technology)**: Code quality, architecture, tech stack fit, docs
+- **E (Ecosystem)**: Stars/forks, community activity, integrations, maintainer reputation
+- **M (Market)**: Timing, competitive scarcity, trend alignment, commercializability
+- **C (Combo)**: Stack compatibility, modularity, business combo potential, learning cost
 
-## 🔗 相关分类
+## ⚔️ Solo Dev Verdict
 
-- [code-base](https://github.com/bursh3347-collab/code-base) — 通用代码库
-- [ai-agent-stack](https://github.com/bursh3347-collab/ai-agent-stack) — AI Agent分类
+**Playwright is the king of browser automation for TypeScript devs.** It's faster, more reliable, and better-typed than Puppeteer — and the `@playwright/mcp` integration makes it the default choice for AI agent browser control.
+
+**Firecrawl is the scraping game-changer.** Instead of wrestling with selectors and pagination, you get clean Markdown from any URL — perfect for RAG pipelines and LLM data ingestion.
+
+**n8n is your ops backbone.** Self-hostable, 400+ integrations, visual workflow builder. For a solo dev, n8n replaces the need for a dedicated ops engineer.
+
+## 🔗 Related Stacks
+
+- [code-base](https://github.com/bursh3347-collab/code-base) — Shared utility code
+- [ai-agent-stack](https://github.com/bursh3347-collab/ai-agent-stack) — AI Agent frameworks
+- [security-stack](https://github.com/bursh3347-collab/security-stack) — Security tools
 
 ---
 
-*由 [天工系统·代码猎手](https://github.com/bursh3347-collab) 自动化产出 | TEMC评分体系*
+*Powered by [TEMC scoring methodology](https://github.com/bursh3347-collab). Data updated 2026-04-15.*
