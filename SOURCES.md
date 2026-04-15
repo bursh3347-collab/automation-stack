@@ -1,27 +1,27 @@
-# Sources
+# 📋 Sources — 所有来源项目清单
 
-All projects analyzed in this repository with links and license information.
+> 本仓库所有分析内容的来源项目、License和数据
 
-Last updated: 2026-04-15
+| 项目 | GitHub | Stars | License | 语言 | TEMC | 状态 |
+|------|--------|-------|---------|------|------|------|
+| Playwright | [microsoft/playwright](https://github.com/microsoft/playwright) | 86.5k | Apache-2.0 | TypeScript | 90 | ✅ 活跃 |
+| Firecrawl | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 109k | AGPL-3.0 | TypeScript | 89 | ✅ 活跃 |
+| n8n | [n8n-io/n8n](https://github.com/n8n-io/n8n) | 184k | Fair-code | TypeScript | 89 | ✅ 活跃 |
+| Crawlee | [apify/crawlee](https://github.com/apify/crawlee) | 22.8k | Apache-2.0 | TypeScript | 83 | ✅ 活跃 |
+| Puppeteer | [puppeteer/puppeteer](https://github.com/puppeteer/puppeteer) | 90k | Apache-2.0 | TypeScript | 82 | ✅ 活跃 |
+| Scrapy | [scrapy/scrapy](https://github.com/scrapy/scrapy) | 61.3k | BSD-3 | Python | 74 | ✅ 活跃 |
+| Selenium | [SeleniumHQ/selenium](https://github.com/SeleniumHQ/selenium) | 34k | Apache-2.0 | Java(多语言) | 67 | ✅ 活跃 |
 
-## Projects
+## License 说明
 
-| # | Project | GitHub | Stars | License | TEMC | Status |
-|---|---------|--------|-------|---------|------|--------|
-| 1 | Firecrawl | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 109k | AGPL-3.0 | 90 | ✅ Analyzed |
-| 2 | Playwright | [microsoft/playwright](https://github.com/microsoft/playwright) | 86k | Apache-2.0 | 88 | ✅ Analyzed |
-| 3 | n8n | [n8n-io/n8n](https://github.com/n8n-io/n8n) | 184k | Sustainable Use | 86 | ✅ Analyzed |
-| 4 | Crawlee | [apify/crawlee](https://github.com/apify/crawlee) | 23k | Apache-2.0 | 83 | ✅ Analyzed |
-| 5 | Puppeteer | [puppeteer/puppeteer](https://github.com/puppeteer/puppeteer) | 94k | Apache-2.0 | 80 | ✅ Analyzed |
-| 6 | Scrapy | [scrapy/scrapy](https://github.com/scrapy/scrapy) | 61k | BSD-3-Clause | 77 | ✅ Analyzed |
-| 7 | Selenium | [SeleniumHQ/selenium](https://github.com/SeleniumHQ/selenium) | 34k | Apache-2.0 | 67 | ✅ Analyzed |
+- **Apache-2.0**：可自由商用、修改、分发，需保留版权声明
+- **BSD-3**：与Apache-2.0类似，可自由商用
+- **AGPL-3.0**：衍生作品必须开源。商业闭源SaaS需购买商业许可
+- **Fair-code (Sustainable Use)**：可自用和修改，但不可作为竞品SaaS销售
 
-## License Compliance Notes
+## 数据采集时间
 
-- **Apache-2.0 / BSD-3**: Free for commercial use, must include license notice
-- **AGPL-3.0 (Firecrawl)**: Derivative works must be open-sourced. Use API or clean-room rewrite for commercial products.
-- **Sustainable Use License (n8n)**: Cannot build competing workflow automation platform. OK for internal use and as infrastructure.
+所有数据采集于 2026-04-15，Stars数为当日快照。
 
-## Data Collection Date
-
-All star counts and activity data collected on **2026-04-15** via GitHub API.
+---
+*天工·代码猎手 自动维护*

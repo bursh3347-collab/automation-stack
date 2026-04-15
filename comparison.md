@@ -1,79 +1,81 @@
-# Automation & Web Scraping — Full Comparison
+# 🔄 Automation & Scraping Stack — 横向对比表
 
-Last updated: 2026-04-15
+> 7个TOP项目全方位对比，帮你快速选型
 
-## Quick Comparison Table
+## 综合评分排名
 
-| Feature | Firecrawl | Playwright | n8n | Crawlee | Scrapy | Puppeteer | Selenium |
-|---------|-----------|------------|-----|---------|--------|-----------|----------|
-| **TEMC Score** | **90** 🏆 | **88** | **86** | **83** | **77** | **80** | **67** |
-| **Stars** | 109k | 86k | 184k | 23k | 61k | 94k | 34k |
-| **Language** | TypeScript | TypeScript | TypeScript | TypeScript | Python | TypeScript | Java (multi) |
-| **License** | AGPL-3.0 ⚠️ | Apache-2.0 ✅ | Fair-code ⚠️ | Apache-2.0 ✅ | BSD-3 ✅ | Apache-2.0 ✅ | Apache-2.0 ✅ |
-| **Primary Use** | AI scraping | Browser automation | Workflow automation | Reliable crawling | Python scraping | Chrome automation | Cross-browser testing |
-| **AI-Native** | ✅ Yes | ❌ No (but AI-compatible) | ✅ Yes (LangChain nodes) | ❌ No | ❌ No | ❌ No | ❌ No |
-| **MCP Support** | ✅ Server | ❌ No | ✅ Client+Server | ❌ No | ❌ No | ❌ No | ❌ No |
-| **Anti-blocking** | Built-in | Manual | Via nodes | Built-in | Middleware | Manual | Manual |
-| **Proxy Rotation** | Built-in | Manual | Via nodes | Built-in | Middleware | Manual | Manual |
-| **Headless Browser** | Yes | Yes (3 engines) | Via nodes | Yes (PW/PP) | Via scrapy-playwright | Yes (Chrome) | Yes (multi) |
-| **Commercial Friendly** | ⚠️ AGPL | ✅ | ⚠️ Fair-code | ✅ | ✅ | ✅ | ✅ |
-| **Best For** | AI data pipelines | Testing + automation | Business workflows | TS web crawling | Python data extraction | Chrome-specific tasks | Enterprise legacy |
+| 排名 | 项目 | ⭐ Stars | TEMC综合 | T技术 | E生态 | M市场 | C组合 | License |
+|------|------|---------|---------|-------|-------|-------|-------|---------|
+| 1 | **Playwright** | 86.5k | **90** | 92 | 90 | 88 | 90 | Apache-2.0 |
+| 2 | **Firecrawl** | 109k | **89** | 88 | 90 | 92 | 85 | ⚠️ AGPL-3.0 |
+| 3 | **n8n** | 184k | **89** | 88 | 95 | 90 | 82 | ⚠️ Fair-code |
+| 4 | **Crawlee** | 22.8k | **83** | 85 | 75 | 82 | 88 | Apache-2.0 |
+| 5 | **Puppeteer** | 90k | **82** | 85 | 88 | 75 | 82 | Apache-2.0 |
+| 6 | **Scrapy** | 61.3k | **74** | 78 | 85 | 65 | 70 | BSD-3 |
+| 7 | **Selenium** | 34k | **67** | 75 | 82 | 60 | 55 | Apache-2.0 |
 
-## Decision Matrix: Which Tool to Use?
+## 按使用场景推荐
 
-### By Use Case
+### 🤖 AI Agent 浏览器操控
+**首选：Playwright** → auto-wait + @playwright/mcp = AI Agent直接操控浏览器
+备选：Puppeteer（Chrome-only场景）
 
-| Use Case | Recommended | Runner-up | Why |
-|----------|-------------|-----------|-----|
-| **AI data extraction** | Firecrawl | Crawlee + LLM | LLM-ready markdown output |
-| **E2E testing** | Playwright | Selenium | Cross-browser, auto-wait, modern API |
-| **Browser automation** | Playwright | Puppeteer | Cross-browser, better API |
-| **Business workflow automation** | n8n | Custom code | Visual builder, 400+ integrations |
-| **Large-scale Python crawling** | Scrapy | Crawlee | 16 years proven, pipeline architecture |
-| **TypeScript web crawling** | Crawlee | Playwright + custom | Built-in proxy, retry, storage |
-| **Chrome-specific automation** | Puppeteer | Playwright | Native CDP access |
-| **Enterprise cross-browser** | Selenium | Playwright | W3C standard, multi-language |
-| **AI agent browser control** | Playwright | Puppeteer | Context isolation, TypeScript |
+### 📊 AI/LLM 数据采集
+**首选：Firecrawl** → HTML→Markdown + LLM Extract = AI-ready数据
+备选：Crawlee（需要Apache-2.0许可时）
 
-### By Tech Stack
+### 🕷️ 大规模结构化爬虫
+**首选：Crawlee**（TypeScript项目）/ **Scrapy**（Python项目）
+备选：Firecrawl（API模式调用）
 
-| Your Stack | Best Choice | Why |
-|------------|------------|-----|
-| TypeScript / Next.js | **Crawlee** or **Playwright** | Native TS, Apache-2.0 |
-| Python / FastAPI | **Scrapy** | Python-native, mature ecosystem |
-| AI / LLM pipeline | **Firecrawl** | LLM-ready output, MCP support |
-| No-code / low-code | **n8n** | Visual builder, AI nodes |
-| Enterprise Java | **Selenium** | W3C standard, multi-language |
+### ⚙️ 工作流自动化
+**首选：n8n** → 400+集成 + AI节点 + 可视化编排
+备选：自研webhook + Playwright（轻量场景）
 
-## TEMC Score Breakdown
+### 🧪 E2E测试
+**首选：Playwright** → 跨浏览器 + auto-wait + trace viewer
+备选：Cypress（前端专用）
 
-| Project | T (Tech) | E (Ecosystem) | M (Market) | C (Combination) | **Total** |
-|---------|----------|----------------|------------|------------------|-----------|
-| Firecrawl | 90 | 88 | 92 | 90 | **90** |
-| Playwright | 92 | 90 | 85 | 88 | **88** |
-| n8n | 88 | 92 | 85 | 82 | **86** |
-| Crawlee | 85 | 78 | 82 | 85 | **83** |
-| Puppeteer | 82 | 88 | 72 | 78 | **80** |
-| Scrapy | 82 | 85 | 72 | 70 | **77** |
-| Selenium | 75 | 82 | 60 | 55 | **67** |
+### 📄 PDF生成/截图服务
+**首选：Puppeteer** → Chrome原生PDF/截图能力最强
+备选：Playwright
 
-## License Risk Matrix
+## 技术栈对比
 
-| License | Projects | Commercial Use | Derivative Works | Risk Level |
-|---------|----------|---------------|-------------------|------------|
-| Apache-2.0 | Playwright, Crawlee, Puppeteer, Selenium | ✅ Free | ✅ Free | 🟢 Safe |
-| BSD-3-Clause | Scrapy | ✅ Free | ✅ Free | 🟢 Safe |
-| AGPL-3.0 | Firecrawl | ⚠️ Must open-source | ⚠️ Must open-source | 🟡 Caution |
-| Fair-code | n8n | ⚠️ Can't compete | ⚠️ Can't redistribute | 🟡 Caution |
+| 特性 | Playwright | Firecrawl | n8n | Crawlee | Puppeteer | Scrapy | Selenium |
+|------|-----------|-----------|-----|---------|-----------|--------|----------|
+| **语言** | TypeScript | TypeScript | TypeScript | TypeScript | TypeScript | Python | Java(多语言) |
+| **JS渲染** | ✅ 多浏览器 | ✅ 内置 | ⚠️ 需集成 | ✅ 多引擎 | ✅ Chrome | ❌ 需Splash | ✅ WebDriver |
+| **Auto-wait** | ✅ | N/A | N/A | ⚠️ 部分 | ❌ | N/A | ❌ |
+| **MCP支持** | ✅ 官方 | ✅ 官方 | ✅ 双向 | ❌ | ❌ | ❌ | ❌ |
+| **代理轮换** | ⚠️ 手动 | ✅ 内置 | ⚠️ 需节点 | ✅ 自动 | ⚠️ 手动 | ✅ 中间件 | ⚠️ 手动 |
+| **分布式** | ❌ | ✅ API | ✅ Worker | ✅ Apify Cloud | ❌ | ✅ Scrapy Cloud | ✅ Grid |
+| **AI集成** | ⚠️ MCP | ✅ 原生 | ✅ AI节点 | ❌ | ❌ | ❌ | ❌ |
+| **自托管** | N/A | ✅ Docker | ✅ Docker | ✅ Docker | N/A | ✅ | ✅ Grid |
 
-## Growth Trends
+## License 风险矩阵
 
-| Project | Age | Stars/Year | Trajectory | Signal |
-|---------|-----|-----------|------------|--------|
-| Firecrawl | 2 years | ~55k/yr | 🚀 Explosive | AI demand driving adoption |
-| n8n | 7 years | ~26k/yr | 🚀 Accelerating | AI features boosting growth |
-| Playwright | 6 years | ~14k/yr | ↑ Strong | Replacing Puppeteer/Selenium |
-| Crawlee | 10 years | ~2.3k/yr | ↑ Steady | Niche but loyal community |
-| Puppeteer | 9 years | ~10k/yr | → Flat | Legacy growth, new users go Playwright |
-| Scrapy | 16 years | ~3.8k/yr | → Stable | Mature, steady Python demand |
-| Selenium | 13 years | ~2.6k/yr | ↓ Declining | Legacy, being replaced |
+| 项目 | License | 商业闭源SaaS | 内部使用 | 修改后分发 | 风险等级 |
+|------|---------|-------------|---------|-----------|----------|
+| Playwright | Apache-2.0 | ✅ | ✅ | ✅ | 🟢 低 |
+| Puppeteer | Apache-2.0 | ✅ | ✅ | ✅ | 🟢 低 |
+| Crawlee | Apache-2.0 | ✅ | ✅ | ✅ | 🟢 低 |
+| Selenium | Apache-2.0 | ✅ | ✅ | ✅ | 🟢 低 |
+| Scrapy | BSD-3 | ✅ | ✅ | ✅ | 🟢 低 |
+| n8n | Fair-code | ⚠️ 不可竞品 | ✅ | ⚠️ 限制 | 🟡 中 |
+| Firecrawl | AGPL-3.0 | ❌ 需商业许可 | ⚠️ 衍生需开源 | ❌ 必须开源 | 🔴 高 |
+
+## 天子选型建议
+
+基于天子基准技术栈（TypeScript + Next.js + Supabase + Vercel）：
+
+1. **必装**：Playwright（测试+AI Agent浏览器操控）
+2. **强烈推荐**：Crawlee（TypeScript原生+Apache-2.0=最佳爬虫选择）
+3. **推荐**：n8n（自托管工作流自动化，一人公司基础设施）
+4. **按需**：Firecrawl（AI数据采集API调用模式，规避AGPL）
+5. **了解**：Puppeteer（Chrome特定场景，如PDF生成SaaS）
+6. **参考**：Scrapy（Python数据管道，架构模式可借鉴）
+7. **跳过**：Selenium（已被Playwright全面替代）
+
+---
+*最后更新：2026-04-15 | TEMC评分体系 by 天工·代码猎手*

@@ -1,138 +1,111 @@
-# Workflow Automation Best Practices
+# ⚙️ Workflow Automation 最佳实践
 
-> Patterns extracted from n8n (184k⭐), Crawlee (23k⭐), and Scrapy (61k⭐) pipeline architectures.
+> 从n8n和自动化项目中提炼的工作流设计模式
 
-## 1. Node/Plugin Architecture (from n8n)
+## 1. 节点化架构（来自 n8n）
 
-The most powerful pattern for extensible automation:
+**问题**：需要灵活组合不同服务/API的自动化流程
 
+**最佳实践**：
 ```typescript
-// Pattern: Self-describing automation node
-interface AutomationNode {
+// 统一的节点接口
+interface WorkflowNode {
+  execute(input: NodeInput): Promise<NodeOutput>;
+  trigger?(webhook: WebhookData): Promise<NodeOutput>; // 触发器节点
+  
+  // 元数据
   name: string;
   description: string;
-  inputs: NodeInput[];        // What this node accepts
-  outputs: NodeOutput[];      // What this node produces
-  credentials?: Credential[]; // Required auth
-  execute(input: any): Promise<any>;
+  inputs: ParameterSchema[];
+  outputs: ParameterSchema[];
+  credentials?: CredentialSchema[]; // 需要的凭证
 }
 
-// Each node is:
-// 1. Self-contained (no external dependencies)
-// 2. Declarative (inputs/outputs/credentials declared upfront)
-// 3. Composable (chain nodes into workflows)
-```
-
-**From n8n**: Every integration is a node. 400+ nodes follow the same pattern. This makes it trivial to add new integrations.
-
-## 2. DAG Execution Engine (from n8n)
-
-```
-[Trigger] → [Node A] → [Branch]
-                          ├── [Node B] → [Node D] → [Output]
-                          └── [Node C] → [Output]
-```
-
-Key principles:
-- **Topological sort**: Execute nodes in dependency order
-- **Parallel branches**: Independent paths execute concurrently
-- **Error propagation**: Errors bubble up with context
-- **Retry per node**: Each node has its own retry policy
-
-## 3. Credential Management (from n8n)
-
-```typescript
-// Pattern: Encrypted credential storage
-interface CredentialStore {
-  // Store encrypted, retrieve decrypted
-  save(name: string, data: Record<string, string>): Promise<void>;
-  get(name: string): Promise<Record<string, string>>;
-  // AES-256-CBC encryption at rest
-  // Decrypt only at execution time
-  // Never log credential values
+// 工作流定义
+interface Workflow {
+  nodes: WorkflowNode[];
+  connections: Connection[]; // 节点间数据流
+  settings: WorkflowSettings;
 }
 ```
 
-**Critical rule**: Credentials are encrypted at rest, decrypted only during node execution, never logged or exposed in error messages.
+**关键设计**：每个节点独立、可复用、可测试。节点间通过数据流连接。
 
-## 4. Trigger Patterns (from n8n + general)
+**来源**：n8n `packages/workflow/` + `packages/nodes-base/`
 
-| Trigger Type | Pattern | Use Case |
-|-------------|---------|----------|
-| **Webhook** | HTTP POST → start workflow | External event (Stripe, GitHub) |
-| **Schedule** | Cron expression → start | Daily reports, periodic checks |
-| **Polling** | Check source every N minutes | APIs without webhooks |
-| **Event** | Message queue → start | Real-time processing |
-| **Manual** | User click → start | Testing, one-off tasks |
+## 2. Webhook触发器模式（来自 n8n）
 
-## 5. Error Handling Strategies
-
+**最佳实践**：
 ```typescript
-// Pattern: Multi-level error handling
-class WorkflowExecutor {
-  async executeNode(node: Node, input: any) {
-    try {
-      return await node.execute(input);
-    } catch (error) {
-      // Level 1: Node-level retry
-      if (node.retryPolicy && attempt < node.maxRetries) {
-        return await this.retryNode(node, input, attempt + 1);
-      }
-      // Level 2: Error output path
-      if (node.errorOutput) {
-        return await this.executeNode(node.errorOutput, { error, input });
-      }
-      // Level 3: Workflow-level error handler
-      return await this.handleWorkflowError(error, node);
-    }
+// 通用Webhook处理器
+class WebhookHandler {
+  async handleIncoming(req: Request): Promise<void> {
+    // 1. 验证签名（HMAC/API Key）
+    this.verifySignature(req);
+    
+    // 2. 解析payload
+    const payload = this.parsePayload(req);
+    
+    // 3. 匹配工作流
+    const workflow = this.findWorkflow(req.path);
+    
+    // 4. 触发执行
+    await this.executeWorkflow(workflow, payload);
+    
+    // 5. 返回响应（同步/异步可选）
   }
 }
 ```
 
-## 6. Idempotency (Critical for Automation)
+**来源**：n8n `packages/cli/` webhook处理
 
+## 3. 凭证安全管理（来自 n8n）
+
+**最佳实践**：
+- API密钥加密存储（AES-256 + 环境变量密钥）
+- OAuth token自动刷新
+- 凭证与工作流分离（引用而非内嵌）
+- 最小权限原则
+
+**来源**：n8n Credential管理系统
+
+## 4. 错误处理与重试（通用）
+
+**最佳实践**：
 ```typescript
-// Pattern: Every automation step should be idempotent
-// Running it twice produces the same result
-
-// ❌ Bad: Creates duplicate entries
-await db.insert({ name: 'John', email: 'john@example.com' });
-
-// ✅ Good: Upsert with unique key
-await db.upsert(
-  { email: 'john@example.com' },
-  { name: 'John', email: 'john@example.com' }
-);
-```
-
-**Why**: Automation workflows WILL fail mid-execution. When you retry, you don't want duplicate records, double charges, or repeated notifications.
-
-## 7. Observability (from n8n + production patterns)
-
-```typescript
-// Pattern: Every workflow execution should be traceable
-interface ExecutionLog {
-  workflowId: string;
-  executionId: string;  // Unique per run
-  startedAt: Date;
-  completedAt: Date;
-  status: 'success' | 'error' | 'timeout';
-  nodes: {
-    nodeId: string;
-    input: any;         // Sanitized (no credentials)
-    output: any;
-    duration: number;
-    error?: string;
-  }[];
+class RetryHandler {
+  async executeWithRetry<T>(
+    fn: () => Promise<T>,
+    options: { maxRetries: number; backoff: 'exponential' | 'linear' }
+  ): Promise<T> {
+    for (let i = 0; i <= options.maxRetries; i++) {
+      try {
+        return await fn();
+      } catch (error) {
+        if (i === options.maxRetries) throw error;
+        const delay = options.backoff === 'exponential' 
+          ? Math.pow(2, i) * 1000 
+          : i * 1000;
+        await new Promise(r => setTimeout(r, delay));
+      }
+    }
+    throw new Error('Unreachable');
+  }
 }
 ```
 
-## Summary: Automation Architecture Principles
+## 5. 一人公司自动化优先级
 
-1. **Everything is a node** — Self-contained, composable units
-2. **Fail gracefully** — Multi-level error handling + retries
-3. **Be idempotent** — Safe to retry any step
-4. **Encrypt credentials** — At rest and in transit
-5. **Log everything** — But sanitize sensitive data
-6. **Design for retry** — Assume any step can fail
-7. **Separate triggers from logic** — Many triggers, same workflow
+基于n8n + 天子时间约束（每天4小时），推荐自动化优先级：
+
+| 优先级 | 自动化类型 | ROI | 推荐工具 |
+|--------|-----------|-----|----------|
+| P0 | 数据采集→AI处理 | 🔥 极高 | Firecrawl + n8n |
+| P0 | 监控告警 | 🔥 极高 | n8n webhook |
+| P1 | 内容发布流水线 | 📈 高 | n8n + API |
+| P1 | 客户通知 | 📈 高 | n8n + Email/Slack |
+| P2 | 报表生成 | 📊 中 | n8n + Playwright截图 |
+| P3 | 竞品监控 | 📊 中 | Crawlee + n8n |
+
+---
+*提炼自 n8n/Playwright/Firecrawl 的生产实践，面向一人公司场景优化*

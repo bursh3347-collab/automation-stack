@@ -1,106 +1,63 @@
-# 🤖 automation-stack
+# 🔄 automation-stack
 
-> ⭐ Maturity: **L1 Growing** — 7 projects deeply analyzed with TEMC scoring, comparison table, and best practices.
+> ⭐ Maturity: **L1 Growing** — 7个TOP项目已分析，横向对比+最佳实践已完成
 
-Extracted best practices and deep analyses from the world's top automation & web scraping open-source projects.
+从GitHub全域自动化/爬虫/工作流高星项目中，拆解精华、提炼最佳实践、横向对比选型。
 
-## 📊 Leaderboard (by TEMC Score)
-
-| Rank | Project | Stars | TEMC | Language | License | Trend |
-|------|---------|-------|------|----------|---------|-------|
-| 1 | [Firecrawl](projects/firecrawl.md) | 109k | **90** | TypeScript | AGPL-3.0 ⚠️ | 🚀 |
-| 2 | [Playwright](projects/playwright.md) | 86k | **88** | TypeScript | Apache-2.0 ✅ | 🚀 |
-| 3 | [n8n](projects/n8n.md) | 184k | **86** | TypeScript | Fair-code ⚠️ | 🚀 |
-| 4 | [Crawlee](projects/crawlee.md) | 23k | **83** | TypeScript | Apache-2.0 ✅ | ↑ |
-| 5 | [Puppeteer](projects/puppeteer.md) | 94k | **80** | TypeScript | Apache-2.0 ✅ | → |
-| 6 | [Scrapy](projects/scrapy.md) | 61k | **77** | Python | BSD-3 ✅ | → |
-| 7 | [Selenium](projects/selenium.md) | 34k | **67** | Java (multi) | Apache-2.0 ✅ | ↓ |
-
-## 📂 Repository Structure
-
-```
-automation-stack/
-├── README.md              ← You are here
-├── projects/              ← Individual project analyses (TEMC-scored)
-│   ├── firecrawl.md       (TEMC: 90)
-│   ├── playwright.md      (TEMC: 88)
-│   ├── n8n.md             (TEMC: 86)
-│   ├── crawlee.md         (TEMC: 83)
-│   ├── puppeteer.md       (TEMC: 80)
-│   ├── scrapy.md          (TEMC: 77)
-│   └── selenium.md        (TEMC: 67)
-├── best-practices/        ← Extracted patterns from multiple projects
-│   ├── scraping-patterns.md
-│   └── workflow-automation.md
-├── code/                  ← Extracted code snippets (coming in L2)
-├── comparison.md          ← Side-by-side comparison of all 7 projects
-├── SOURCES.md             ← All source projects with links & licenses
-└── CONTRIBUTING.md        ← How to contribute
-```
-
-## 🎯 What This Repo Is
-
-This is **not** a bookmark list. Each project is deeply analyzed with:
-
-- **TEMC Score**: Technology (T) × Ecosystem (E) × Market (M) × Combination (C) weighted scoring
-- **Architecture analysis**: Directory structure, core modules, design patterns
-- **Extractable patterns**: What code/patterns can be reused in your own projects
-- **Disassembly assessment**: Which modules can be extracted, difficulty, and time estimates
-- **Business value**: Pain points, target users, competitive landscape, monetization potential
-- **Anti-fragility**: Bus factor, license risks, dependency safety
-- **Counter-arguments**: Why each project might NOT be worth using
-
-## 🔥 Quick Decision Guide
-
-| Your Need | Best Choice | Why |
-|-----------|------------|-----|
-| AI data extraction | **Firecrawl** | LLM-ready markdown output, MCP support |
-| Browser testing & automation | **Playwright** | Cross-browser, TypeScript-native, auto-wait |
-| Business workflow automation | **n8n** | Visual builder, 400+ integrations, AI-native |
-| TypeScript web crawling | **Crawlee** | Built-in proxy rotation, Apache-2.0 |
-| Python data pipeline | **Scrapy** | 16 years battle-tested, pipeline architecture |
-| Chrome-specific automation | **Puppeteer** | Native CDP access, Google-backed |
-| Enterprise legacy | **Selenium** | W3C standard, multi-language |
-
-See [comparison.md](comparison.md) for the full feature comparison.
-
-## 📈 Best Practices
-
-- [Scraping Patterns](best-practices/scraping-patterns.md) — Pipeline architecture, anti-bot, AI extraction, retry patterns
-- [Workflow Automation](best-practices/workflow-automation.md) — Node architecture, DAG execution, credential management
-
-## 🔧 Universal Patterns Identified (→ code-base)
-
-These cross-project patterns have been identified for extraction to the universal `code-base` repository:
-
-| Pattern | Source Projects | Target |
-|---------|----------------|--------|
-| Pipeline architecture | Scrapy, Crawlee | `code-base/data-pipeline/` |
-| Browser pool management | Crawlee | `code-base/browser-automation/` |
-| Proxy rotation | Crawlee, Scrapy | `code-base/networking/` |
-| HTML-to-Markdown for LLMs | Firecrawl | `code-base/ai-integration/` |
-| MCP server pattern | Firecrawl, n8n | `code-base/ai-integration/` |
-| Credential encryption | n8n | `code-base/auth/` |
-| Auto-wait pattern | Playwright | `code-base/browser-automation/` |
-
-## 🤝 Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines. PRs welcome for:
-- New project analyses (follow TEMC template in any existing `.md`)
-- Best practice additions
-- Code extractions (L2 milestone)
-
-## 📊 Scoring Methodology
-
-**TEMC = T×0.25 + E×0.20 + M×0.30 + C×0.25**
-
-| Dimension | Weight | What It Measures |
-|-----------|--------|------------------|
-| **T** (Technology) | 25% | Code quality, architecture, tech stack match, documentation |
-| **E** (Ecosystem) | 20% | Stars/forks, community activity, maintainer reputation, integrations |
-| **M** (Market) | 30% | Market timing, competitive scarcity, trend alignment, commercializability |
-| **C** (Combination) | 25% | Tech stack compatibility, module extractability, commercial combo value, learning cost |
+**TEMC评分体系** | **天工·代码猎手自动化产出** | **Apache-2.0**
 
 ---
 
-*Part of the [GitHub Open Source Knowledge Restructuring Project](https://github.com/bursh3347-collab). Powered by TEMC scoring methodology.*
+## 📈 本分类飙升榜（最近更新：2026-04-15）
+
+| 排名 | 项目 | 总Stars | TEMC | 趋势 |
+|------|------|---------|------|------|
+| 1 | n8n | 184k | 89 | 🚀 |
+| 2 | Firecrawl | 109k | 89 | 🚀 |
+| 3 | Puppeteer | 90k | 82 | → |
+| 4 | Playwright | 86.5k | 90 | 🚀 |
+| 5 | Scrapy | 61.3k | 74 | → |
+| 6 | Selenium | 34k | 67 | ↓ |
+| 7 | Crawlee | 22.8k | 83 | ↑ |
+
+## 📂 仓库结构
+
+```
+automation-stack/
+├── README.md              ← 你在这里
+├── projects/              ← 7个高星项目的TEMC分析
+│   ├── playwright.md      ← 🏆 TEMC 90 — TypeScript跨浏览器自动化
+│   ├── firecrawl.md       ← 🏆 TEMC 89 — AI驱动Web数据采集
+│   ├── n8n.md             ← 🏆 TEMC 89 — 工作流自动化平台
+│   ├── crawlee.md         ← TEMC 83 — TypeScript原生爬虫库
+│   ├── puppeteer.md       ← TEMC 82 — Chrome自动化
+│   ├── scrapy.md          ← TEMC 74 — Python爬虫框架
+│   └── selenium.md        ← TEMC 67 — Web自动化经典
+├── best-practices/        ← 从多个项目中提炼的最佳实践
+│   ├── scraping-patterns.md   ← 爬虫设计模式
+│   └── workflow-automation.md ← 工作流自动化模式
+├── code/                  ← 精华代码提取（待填充）
+├── comparison.md          ← 7个项目横向对比表
+└── SOURCES.md             ← 所有来源清单
+```
+
+## 🎯 天子快速选型
+
+基于天子基准技术栈（TypeScript + Next.js + Supabase + Vercel）：
+
+| 场景 | 首选 | 理由 |
+|------|------|------|
+| AI Agent浏览器操控 | **Playwright** | TypeScript原生 + @playwright/mcp |
+| AI数据采集 | **Firecrawl** | HTML→Markdown + LLM Extract |
+| 工作流自动化 | **n8n** | 400+集成 + AI节点 + MCP |
+| 生产级爬虫 | **Crawlee** | TypeScript + Apache-2.0 |
+| PDF/截图服务 | **Puppeteer** | Chrome原生能力最强 |
+
+## 🔗 相关分类
+
+- [code-base](https://github.com/bursh3347-collab/code-base) — 通用代码库
+- [ai-agent-stack](https://github.com/bursh3347-collab/ai-agent-stack) — AI Agent分类
+
+---
+
+*由 [天工系统·代码猎手](https://github.com/bursh3347-collab) 自动化产出 | TEMC评分体系*

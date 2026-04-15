@@ -1,171 +1,134 @@
-# Web Scraping Best Practices
+# 🕷️ Web Scraping 最佳实践
 
-> Universal patterns extracted from Scrapy (61k⭐), Crawlee (23k⭐), Firecrawl (109k⭐), and Playwright (86k⭐).
+> 从7个TOP项目中提炼的爬虫设计模式和反模式
 
-## 1. Pipeline Architecture (from Scrapy)
+## 1. 请求队列模式（来自 Crawlee）
 
-Every scraping system should follow a pipeline pattern:
+**问题**：大规模爬虫需要管理URL发现、去重、重试、优先级
 
-```
-URL Input → Request Queue → Downloader → Parser → Item Pipeline → Storage
-              ↑                                          |
-              └── Retry/Failed ──────────────────────────┘
-```
-
-**Why**: Separation of concerns makes each stage independently testable, replaceable, and scalable.
-
-**From Scrapy**: Middleware chains at download and spider levels allow injecting cross-cutting concerns (logging, rate limiting, proxy rotation) without modifying core logic.
-
-## 2. Anti-Bot Strategies (from Crawlee + Scrapy)
-
-### Browser Fingerprint Rotation
-- Rotate User-Agent strings (real browser profiles, not random strings)
-- Randomize viewport size, timezone, language headers
-- Use stealth plugins (playwright-extra-stealth / puppeteer-extra-stealth)
-
-### Request Patterns
-- **Random delays**: 1-5 seconds between requests (not fixed intervals)
-- **Session management**: Maintain cookies per crawl session
-- **Referer chain**: Build realistic referer headers
-- **Accept headers**: Match real browser Accept/Accept-Language/Accept-Encoding
-
-### Proxy Strategy (from Crawlee)
+**最佳实践**：
 ```typescript
-// Pattern: Session-based proxy assignment
-// Each session gets ONE proxy, rotated on block
-const proxyConfig = {
-  useApifyProxy: true,
-  proxyUrls: ['http://proxy1:8080', 'http://proxy2:8080'],
-  newUrlFunction: (sessionId) => selectProxy(sessionId)
-};
-```
-
-**Key insight from Crawlee**: Assign one proxy per session (not per request). Rotating per-request triggers anti-bot systems faster.
-
-## 3. Content Extraction for AI (from Firecrawl)
-
-### HTML → Markdown Conversion
-The #1 pattern for feeding web data to LLMs:
-
-1. **Remove noise**: Navigation, footers, ads, scripts, styles
-2. **Preserve structure**: Headings, lists, tables, code blocks
-3. **Clean formatting**: Normalize whitespace, fix encoding
-4. **Output markdown**: Token-efficient format for LLMs
-
-```typescript
-// Pattern: Extract main content
-function extractMainContent(html: string): string {
-  // 1. Use readability algorithm (Mozilla Readability)
-  // 2. Convert to markdown (turndown)
-  // 3. Clean up excess whitespace
-  // 4. Trim to token budget
+// 统一的请求队列接口
+interface RequestQueue {
+  addRequest(url: string, options?: { priority?: number }): Promise<void>;
+  fetchNextRequest(): Promise<Request | null>;
+  markRequestHandled(request: Request): Promise<void>;
+  reclaimRequest(request: Request): Promise<void>; // 失败重试
 }
 ```
 
-### Structured Extraction with LLMs
+**关键设计**：
+- 去重通过URL指纹（normalize后hash）
+- 优先级队列（BFS vs DFS可配置）
+- 失败请求自动回收（指数退避重试）
+- 持久化存储（断点续爬）
+
+**来源**：Crawlee `packages/core/` RequestQueue实现
+
+## 2. 中间件链模式（来自 Scrapy）
+
+**问题**：需要在请求/响应生命周期中灵活插入处理逻辑
+
+**最佳实践**：
 ```typescript
-// Pattern: Schema-guided extraction
-const schema = z.object({
-  title: z.string(),
-  price: z.number(),
-  features: z.array(z.string())
-});
-
-// Send markdown + schema to LLM → get structured JSON
-```
-
-## 4. Retry with Exponential Backoff (from Scrapy + Crawlee)
-
-```typescript
-// Universal retry pattern
-async function fetchWithRetry(
-  url: string,
-  maxRetries: number = 3,
-  baseDelay: number = 1000
-): Promise<Response> {
-  for (let i = 0; i < maxRetries; i++) {
-    try {
-      const response = await fetch(url);
-      if (response.status === 429) {
-        // Rate limited — wait longer
-        await sleep(baseDelay * Math.pow(2, i) * (1 + Math.random()));
-        continue;
-      }
-      if (response.ok) return response;
-    } catch (error) {
-      if (i === maxRetries - 1) throw error;
-      await sleep(baseDelay * Math.pow(2, i));
-    }
-  }
-  throw new Error(`Failed after ${maxRetries} retries`);
+// 中间件接口
+interface Middleware {
+  processRequest?(request: Request): Promise<Request | null>;
+  processResponse?(response: Response): Promise<Response | null>;
+  processError?(error: Error): Promise<void>;
+  priority: number; // 执行顺序
 }
-```
 
-**Scrapy's insight**: Add jitter (randomness) to backoff to prevent thundering herd.
-**Crawlee's insight**: Track blocked responses and rotate proxy before retrying.
-
-## 5. Concurrency Control (from Scrapy + Crawlee)
-
-```typescript
-// Pattern: Adaptive concurrency
-class AdaptiveConcurrency {
-  private currentConcurrency: number;
-  private targetSuccessRate: number = 0.95;
-
-  adjustConcurrency(successRate: number) {
-    if (successRate > this.targetSuccessRate) {
-      // Increase concurrency (things are going well)
-      this.currentConcurrency = Math.min(
-        this.currentConcurrency * 1.1,
-        this.maxConcurrency
-      );
-    } else {
-      // Decrease concurrency (too many failures)
-      this.currentConcurrency = Math.max(
-        this.currentConcurrency * 0.5,
-        this.minConcurrency
-      );
+// 中间件管道
+class MiddlewarePipeline {
+  private middlewares: Middleware[] = [];
+  
+  async processRequest(req: Request): Promise<Request | null> {
+    let current = req;
+    for (const mw of this.middlewares.sort((a,b) => a.priority - b.priority)) {
+      const result = await mw.processRequest?.(current);
+      if (!result) return null; // 中间件可以终止请求
+      current = result;
     }
+    return current;
   }
 }
 ```
 
-**From Scrapy AutoThrottle**: Measure server response time, automatically adjust request rate.
+**典型中间件**：代理轮换、UA随机化、限速、Cookie管理、重试
 
-## 6. Request Deduplication (from Scrapy)
+**来源**：Scrapy `downloadermiddlewares/` 架构
 
+## 3. 多引擎统一接口（来自 Crawlee）
+
+**问题**：不同页面需要不同渲染引擎（静态HTML用HTTP，动态页用浏览器）
+
+**最佳实践**：
 ```typescript
-// Pattern: URL fingerprinting for dedup
-function requestFingerprint(url: string, method: string, body?: string): string {
-  const normalized = new URL(url);
-  // Sort query parameters for consistency
-  normalized.searchParams.sort();
-  const canonical = `${method}:${normalized.toString()}:${body || ''}`;
-  return crypto.createHash('sha256').update(canonical).digest('hex');
+// 统一的爬虫处理器接口
+interface CrawlerHandler {
+  requestHandler(context: CrawlingContext): Promise<void>;
+}
+
+// 根据需求选择引擎
+const crawler = new PlaywrightCrawler({...}); // JS渲染页面
+const crawler = new CheerioCrawler({...});    // 静态HTML
+const crawler = new HttpCrawler({...});        // API调用
+// 所有引擎共享相同的 requestHandler API
+```
+
+**关键**：Handler代码不需要关心底层引擎，可以无缝切换
+
+**来源**：Crawlee多引擎架构
+
+## 4. HTML→AI-ready数据转换（来自 Firecrawl）
+
+**问题**：LLM/RAG需要干净的文本数据，HTML噪音太多
+
+**最佳实践**：
+1. 移除导航栏、侧边栏、页脚、广告
+2. 保留语义结构（标题层级、列表、表格）
+3. 转换为Markdown（LLM最友好的格式）
+4. 可选：用LLM提取结构化数据（JSON Schema定义）
+
+**来源**：Firecrawl HTML→Markdown引擎
+
+## 5. 代理轮换+健康检查（来自 Crawlee + Scrapy）
+
+**最佳实践**：
+```typescript
+class ProxyRotator {
+  private proxies: Proxy[] = [];
+  private healthMap: Map<string, ProxyHealth> = new Map();
+  
+  getProxy(): Proxy {
+    // 优先选择健康度高的代理
+    return this.proxies
+      .filter(p => this.healthMap.get(p.url)?.isHealthy)
+      .sort((a, b) => this.getScore(b) - this.getScore(a))[0];
+  }
+  
+  reportResult(proxy: Proxy, success: boolean) {
+    // 更新健康度
+    const health = this.healthMap.get(proxy.url)!;
+    health.successRate = (health.successRate * 0.9) + (success ? 0.1 : 0);
+    if (health.successRate < 0.3) health.isHealthy = false;
+  }
 }
 ```
 
-## 7. Sitemap-First Discovery (from Crawlee + Firecrawl)
+**来源**：Crawlee `proxy-rotation/` + Scrapy中间件
 
-```typescript
-// Pattern: Always check sitemap before crawling
-async function discoverUrls(domain: string): Promise<string[]> {
-  // 1. Check robots.txt for sitemap location
-  // 2. Parse sitemap.xml (including sitemap index)
-  // 3. Fall back to link-based crawling if no sitemap
-  // This is 10-100x faster than crawling link-by-link
-}
-```
+## 反模式（避免）
 
-## Summary: When to Use What
+| 反模式 | 问题 | 正确做法 |
+|--------|------|----------|
+| 硬编码sleep等待 | 不可靠+浪费时间 | 用auto-wait或元素检测 |
+| 不做去重 | 重复爬取浪费资源 | URL指纹去重 |
+| 单一UA | 容易被封 | UA池随机轮换 |
+| 无限速 | 被IP封禁 | 自适应限速 |
+| 不处理失败 | 数据丢失 | 指数退避重试 |
+| 全用浏览器 | 资源浪费 | 静态页用HTTP/Cheerio |
 
-| Pattern | Best Source | Apply When |
-|---------|------------|------------|
-| Pipeline architecture | Scrapy | Building any data extraction system |
-| Anti-bot strategies | Crawlee | Scraping sites with protection |
-| AI content extraction | Firecrawl | Feeding data to LLMs |
-| Browser automation | Playwright | JS-heavy sites, SPAs |
-| Retry + backoff | Universal | Any HTTP client |
-| Adaptive concurrency | Scrapy | High-volume scraping |
-| Request dedup | Scrapy | Large-scale crawling |
-| Sitemap discovery | Crawlee | Starting a new crawl |
+---
+*提炼自 Scrapy/Playwright/Firecrawl/Crawlee 四大项目的生产实践*
