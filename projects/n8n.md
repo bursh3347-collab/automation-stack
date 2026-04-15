@@ -1,114 +1,91 @@
 # n8n
 
-> The open-source workflow automation platform with native AI — 400+ integrations, visual builder, self-hostable.
+> 开源AI原生工作流自动化平台，400+集成+可视化编排+自托管
 
-| Metric | Data |
-|--------|------|
+| 指标 | 数据 |
+|------|------|
 | GitHub | [n8n-io/n8n](https://github.com/n8n-io/n8n) |
-| Stars | 184,154 |
-| Forks | 56,818 |
-| License | Sustainable Use License (fair-code) ⚠️ |
-| Language | TypeScript |
-| Last Update | 2026-04-15 (today) |
-| Version | v2.17.0 |
-| Topics | ai, automation, mcp, workflow, low-code |
+| Stars | 184,163 |
+| Forks | 56,819 |
+| License | Sustainable Use License (Fair-code) |
+| 语言 | TypeScript |
+| 最后更新 | 2026-04-15 |
+| Contributors | 700+ |
+| Open Issues | 1,463 |
+| 创建时间 | 2019-06-22 |
 
-## TEMC Score
+## TEMC评分
 
-| Dimension | Score | Rationale |
-|-----------|-------|-----------|
-| T (Tech) | 88 | TypeScript monorepo (turbo/pnpm), AI-native nodes, MCP client+server, 400+ integrations. Production-grade. |
-| E (Ecosystem) | 92 | 184k stars = top 50 GitHub globally. 56k forks. Enterprise adoption. Active Discord community. |
-| M (Market) | 85 | Workflow automation market booming with AI. Competes with Zapier/Make but open-source + AI-native. |
-| C (Combination) | 82 | TypeScript ✅, MCP ✅, but fair-code license limits commercial redistribution. Best as infrastructure, not product base. |
-| **Total** | **86** | T×0.25 + E×0.20 + M×0.30 + C×0.25 |
+| 维度 | 分数 | 理由 |
+|------|------|------|
+| T 技术 | 88 | TypeScript monorepo，可视化编排+代码混合，AI节点（LLM/Agent/Memory/Vector Store），MCP client+server双向支持 |
+| E 生态 | 95 | 184k⭐（自动化领域全球第一），400+集成，社区模板丰富，n8n Cloud商业运营 |
+| M 市场 | 90 | AI+自动化=2026最热赛道。替代Zapier/Make的开源方案。一人公司必备基础设施 |
+| C 组合 | 82 | TypeScript原生，可嵌入webhook触发。但系统复杂（pnpm monorepo 30+packages），集成成本高 |
+| **综合** | **89** | T×0.25+E×0.20+M×0.30+C×0.25 = 22+19+27+20.5 |
 
-## Architecture Analysis
+## 核心价值
+
+解决业务流程自动化问题。从简单的Webhook→处理→输出，到复杂的AI Agent工作流，n8n是开源自动化的事实标准。AI节点让非开发者也能构建AI工作流。
+
+## 架构亮点
 
 ```
-n8n-monorepo/
+n8n/
 ├── packages/
-│   ├── cli/              # n8n CLI + main server
-│   ├── core/             # Core execution engine
-│   ├── workflow/          # Workflow data structures
-│   ├── nodes-base/       # 400+ built-in integrations
-│   ├── nodes-langchain/  # AI/LangChain nodes
-│   ├── editor-ui/        # Vue.js visual editor
-│   ├── design-system/    # UI component library
-│   ├── @n8n/task-runner/  # Isolated code execution
-│   └── @n8n/computer-use/ # Computer use capability
-├── scripts/              # Build/deploy scripts
-└── docker/               # Docker configurations
+│   ├── cli/              ← CLI入口+服务器
+│   ├── core/             ← 工作流引擎核心
+│   ├── workflow/          ← 工作流定义+执行
+│   ├── nodes-base/       ← 400+内置节点
+│   ├── editor-ui/        ← Vue.js可视化编辑器
+│   ├── @n8n/ai-workflow-* ← AI工作流模块
+│   └── @n8n/chat/        ← 聊天UI组件
+├── docker/               ← Docker部署
+├── scripts/              ← 构建脚本
+└── turbo.json            ← Turborepo配置
 ```
 
-**Architecture Pattern**: Monorepo with turbo build, pnpm workspaces
+**架构模式**：Monorepo（pnpm + Turborepo），30+packages
 
-**Key Design**: Visual Editor → Workflow Engine → Node Execution → Credential Management. Each node is a self-contained integration.
+**核心设计**：
+- **节点化架构**：每个集成=一个节点，统一接口（execute/trigger/webhook）
+- **可视化+代码**：拖拽编排+Code节点（JS/Python）
+- **AI Agent节点**：LLM Chain/Agent/Memory/VectorStore/Tool原生支持
+- **MCP双向**：既是MCP client（调用外部工具），也是MCP server（暴露工作流为工具）
+- **Credential管理**：统一的API密钥/OAuth管理
 
-## Core Modules (5)
+## 核心模块（5个）
 
-| Module | Size | Coupling | Description |
-|--------|------|----------|-------------|
-| Workflow Engine | Large | High | Execution, branching, error handling |
-| Node System | Large | Low | 400+ self-contained integration nodes |
-| Editor UI | Large | Medium | Vue.js visual workflow builder |
-| AI Nodes | Medium | Medium | LangChain, MCP client/server |
-| Credential Manager | Medium | Medium | Encrypted credential storage |
+1. **Workflow Engine** — 工作流解析+执行引擎（大）
+2. **Node系统** — 400+集成节点+统一接口（巨大）
+3. **Editor UI** — Vue.js可视化编辑器（大）
+4. **AI Agent模块** — LLM/Agent/Memory/Tool（中）
+5. **Credential管理** — API密钥+OAuth+加密存储（中）
 
-## Extractable Patterns
+## 可拆解评估
 
-1. **Node Plugin Architecture** → `code-base/workflow/plugin-system/` ⭐通用代码候选
-   - Self-contained integration pattern: input → process → output
-   - Each node declares its properties, credentials, execution logic
+| 模块 | 可独立抽取 | 难度 | 预估时间 |
+|------|-----------|------|----------|
+| Webhook触发模式 | ✅ | 简单参考 | 1h |
+| Credential加密存储 | ✅ | 需适配 | 3h |
+| AI Agent工作流模式 | ✅ | 需适配 | 4h |
+| Node统一接口设计 | ✅ | 架构参考 | 2h |
 
-2. **Visual Workflow Pattern** → Graph-based execution with branching
-   - DAG execution engine reusable for any pipeline system
+⭐通用代码候选：Credential加密管理（code-base/auth/credential-vault/）
+⭐通用代码候选：Webhook触发器模式（code-base/automation/webhook-trigger/）
 
-3. **Credential Encryption** → AES-256 encrypted credential storage
-   - `code-base/auth/credential-encryption/` ⭐通用代码候选
+## 商业价值
 
-4. **MCP Integration** → Both client and server MCP support
-   - Pattern for making any app MCP-compatible
+- **痛点级别**：致命（一人公司=必须自动化，n8n是最佳开源选择）
+- **TAM**：工作流自动化$20B+ / iPaaS $10B+
+- **竞品**：Zapier（$1.4B估值）、Make.com、Pipedream、Activepieces
+- **可商用度**：⚠️ Sustainable Use License不是传统开源。自用OK，但不能作为竞品SaaS销售
+- **差异化窗口**：AI节点+MCP=下一代自动化平台。但n8n Cloud竞争激烈
 
-## Disassembly Assessment
+## 反证（为什么可能不值得用）
 
-| Module | Extractable? | Difficulty | Time |
-|--------|-------------|------------|------|
-| Node plugin pattern | ✅ Yes | Concept extraction | 2h |
-| DAG execution engine | ⚠️ Partial | Complex, study pattern | 6h |
-| Credential encryption | ✅ Yes | Simple adaptation | 2h |
-| MCP client/server | ⚠️ License | Fair-code limits | 4h |
-| Visual editor | ❌ No | Too coupled, Vue.js | N/A |
-
-**⚠️ License Warning**: Sustainable Use License (fair-code) — you can self-host and modify, but cannot compete with n8n commercially. Fine for internal use or as infrastructure.
-
-## Business Value
-
-- **Pain Point**: Connecting AI with business workflows (Critical for一人公司)
-- **Target Users**: Solo founders, small teams, enterprises
-- **Competitors**: Zapier ($29+/mo), Make ($9+/mo), Activepieces (open-source)
-- **Commercialization**: Use as backend infrastructure for automation SaaS
-- **Differentiation Window**: AI-native workflows — most automation tools bolt AI on; n8n is AI-native
-
-## Combination Potential
-
-- **Product**: AI Automation Agency — n8n workflows + custom AI nodes = client solutions
-- **Sell to**: SMBs needing AI-powered business automation
-- **Price**: $99-499/mo per automation suite
-- **Combo with Firecrawl**: n8n workflow triggers Firecrawl for data → AI processing → action
-- **Combo with Playwright**: n8n orchestrates browser automation tasks
-
-## Anti-fragility Assessment
-
-- **Bus Factor**: n8n GmbH company (50+ employees) — Low risk ✅
-- **Dependency Safety**: Self-contained, well-managed monorepo
-- **CI/CD**: Turbo build, comprehensive CI, Docker support
-- **License**: Sustainable Use License ⚠️ — can't compete with n8n
-
-## Why It Might NOT Be Worth Using
-
-- Fair-code license prevents building a competing automation platform
-- Resource-heavy for self-hosting (Node.js + database + Redis)
-- 184k stars means EVERYONE knows about it — hard to differentiate
-- Complex codebase — contributing or extending requires deep knowledge
-- Visual editor creates vendor lock-in for workflow definitions
+- **Fair-code许可**：不是MIT/Apache，限制竞品使用场景
+- 系统极其复杂（30+packages），学习曲线陡峭
+- 自托管资源消耗大（Node.js+数据库+Redis+Worker）
+- n8n Cloud版本功能更完整，开源版可能被功能限制
+- 184k⭐中包含大量非活跃star（hype效应）

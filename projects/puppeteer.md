@@ -1,104 +1,83 @@
 # Puppeteer
 
-> Google's original Chrome automation library — the tool that popularized headless browser scripting.
+> Google Chrome DevTools团队出品的Chrome/Chromium自动化库
 
-| Metric | Data |
-|--------|------|
+| 指标 | 数据 |
+|------|------|
 | GitHub | [puppeteer/puppeteer](https://github.com/puppeteer/puppeteer) |
-| Stars | ~94,000 |
-| Forks | ~9,000+ |
-| License | Apache-2.0 ✅ |
-| Language | TypeScript |
-| Last Update | 2026-04-15 (today) |
+| Stars | ~90,000 |
+| Forks | ~9,000 |
+| License | Apache-2.0 |
+| 语言 | TypeScript |
+| 最后更新 | 2026-04-15 |
 | Contributors | 400+ |
-| npm Weekly | 5M+ downloads |
+| 创建时间 | 2017-08-16 |
 
-## TEMC Score
+## TEMC评分
 
-| Dimension | Score | Rationale |
-|-----------|-------|-----------|
-| T (Tech) | 82 | Solid Chrome DevTools Protocol (CDP) implementation, TypeScript monorepo, clean API. Now supports Firefox. |
-| E (Ecosystem) | 88 | Google-backed, massive npm adoption, Crawlee/Apify built on top. 94k stars. |
-| M (Market) | 72 | Being overtaken by Playwright for new projects. Still dominant in Chrome-specific automation. |
-| C (Combination) | 78 | TypeScript, Apache-2.0, but Playwright preferred for new work. Good for Chrome-specific tasks. |
-| **Total** | **80** | T×0.25 + E×0.20 + M×0.30 + C×0.25 |
+| 维度 | 分数 | 理由 |
+|------|------|------|
+| T 技术 | 85 | TypeScript，Chrome DevTools Protocol直接对接，PDF生成、截图、性能分析。但仅支持Chromium系浏览器 |
+| E 生态 | 88 | 90k⭐，Google维护，npm周下载量3M+，Crawlee底层引擎之一 |
+| M 市场 | 75 | 被Playwright在多浏览器场景超越，但Chrome-only场景仍是首选（PDF生成/截图服务） |
+| C 组合 | 82 | TypeScript原生，与天子栈匹配。Chrome-only但覆盖95%+用户。Crawlee的Puppeteer crawler可直接用 |
+| **综合** | **82** | T×0.25+E×0.20+M×0.30+C×0.25 = 21.25+17.6+22.5+20.5 |
 
-## Architecture Analysis
+## 核心价值
+
+提供最原生的Chrome DevTools Protocol封装。PDF生成、截图、性能profiling等Chrome特有功能的首选。作为Playwright的前身，API设计影响了整个浏览器自动化领域。
+
+## 架构亮点
 
 ```
 puppeteer/
 ├── packages/
-│   ├── puppeteer/          # Main package (downloads Chrome)
-│   ├── puppeteer-core/     # Core without browser download
-│   ├── browsers/           # Browser download management
-│   └── testserver/         # Test infrastructure
-├── docker/                 # Docker configurations
-├── docs/                   # API documentation
-├── examples/               # Usage examples
-└── test/                   # Test suite
+│   ├── puppeteer/           ← 主包（含Chromium下载）
+│   ├── puppeteer-core/      ← 核心库（无浏览器捆绑）
+│   └── browsers/            ← 浏览器管理
+├── docker/                  ← Docker配置
+├── docs/                    ← API文档
+├── test/                    ← 测试
+└── examples/                ← 示例
 ```
 
-**Architecture Pattern**: Monorepo (puppeteer/puppeteer-core split)
+**架构模式**：单体+Monorepo，通过Chrome DevTools Protocol与浏览器通信
 
-**Key Design**: CDP Connection → Browser/Page → Actions — direct Chrome DevTools Protocol mapping.
+**核心设计**：
+- **CDP直连**：Chrome DevTools Protocol原生支持，零抽象层损耗
+- **Page/Frame/Worker模型**：清晰的浏览器抽象层次
+- **Request Interception**：HTTP请求拦截与修改
+- **Headless New**：Chrome原生headless模式（非旧版headless shell）
 
-## Core Modules (4)
+## 核心模块（4个）
 
-| Module | Size | Coupling | Description |
-|--------|------|----------|-------------|
-| puppeteer-core | Large | Medium | CDP protocol, browser control |
-| Browser management | Medium | Low | Download, launch, connect |
-| Page API | Large | Medium | Navigation, DOM, screenshots |
-| Network interception | Medium | Low | Request/response modification |
+1. **CDP通信层** — Chrome DevTools Protocol封装（大）
+2. **Page/Frame API** — 页面操作抽象（大）
+3. **浏览器管理** — 下载/启动/版本管理（中）
+4. **PDF/截图** — 渲染输出（小）
 
-## Extractable Patterns
+## 可拆解评估
 
-1. **CDP Protocol Wrapper** → Direct Chrome DevTools Protocol access
-   - Lower-level than Playwright, useful for custom automation
+| 模块 | 可独立抽取 | 难度 | 预估时间 |
+|------|-----------|------|----------|
+| CDP通信模式 | ✅ | 需适配 | 3h |
+| PDF生成服务 | ✅ | 简单复制 | 1h |
+| 截图服务 | ✅ | 简单复制 | 1h |
+| 浏览器版本管理 | ⚠️ | 复杂 | 4h |
 
-2. **Browser Download Management** → Automated browser binary management
-   - `code-base/browser-automation/browser-manager/` ⭐通用代码候选
+⭐通用代码候选：PDF/截图生成服务（code-base/automation/pdf-screenshot/）
 
-3. **PDF Generation** → Chrome's built-in PDF rendering
-   - High-quality HTML-to-PDF conversion
+## 商业价值
 
-4. **Network Interception** → Request/response modification patterns
+- **痛点级别**：重要（PDF生成、截图SaaS、Chrome自动化是明确需求）
+- **TAM**：PDF生成SaaS $1B+ / 截图API市场 $500M+
+- **竞品**：Playwright（多浏览器）、CDP直连（更底层）
+- **可商用度**：Apache-2.0完全可商用
+- **差异化窗口**：PDF生成+截图=轻量SaaS，Puppeteer是最直接的实现路径
 
-## Disassembly Assessment
+## 反证（为什么可能不值得用）
 
-| Module | Extractable? | Difficulty | Time |
-|--------|-------------|------------|------|
-| PDF generation wrapper | ✅ Yes | Simple wrapper | 1h |
-| Network interception | ✅ Yes | Pattern extraction | 2h |
-| Browser management | ⚠️ Partial | Complex, Chrome-specific | 4h |
-| CDP protocol | ❌ No | Core dependency | N/A |
-
-## Business Value
-
-- **Pain Point**: Chrome-specific automation and PDF generation (Important)
-- **Target Users**: Developers needing Chrome automation, PDF services
-- **Competitors**: Playwright (cross-browser), Selenium (multi-language)
-- **Commercialization**: PDF-as-a-Service, screenshot service
-- **Differentiation Window**: Narrowing — Playwright covers most use cases better
-
-## Combination Potential
-
-- **Product**: HTML-to-PDF SaaS — Puppeteer for high-fidelity PDF rendering
-- **Sell to**: Companies needing invoice/report PDF generation
-- **Price**: $19-49/mo per 10K PDFs
-- **Alternative**: Use as Crawlee backend for reliable scraping
-
-## Anti-fragility Assessment
-
-- **Bus Factor**: Google team (5+ maintainers) — Low risk
-- **Dependency Safety**: Chrome binary dependency, well-managed
-- **CI/CD**: GitHub Actions, release-please automation
-- **License**: Apache-2.0 ✅ fully commercial
-
-## Why It Might NOT Be Worth Using
-
-- Playwright is strictly better for new cross-browser projects
-- Chrome-only by design (Firefox support is experimental)
-- Google could shift focus to Chrome's built-in Testing Protocol
-- Market share declining in favor of Playwright
-- Stars are legacy — new projects overwhelmingly choose Playwright
+- Playwright已在多数场景替代Puppeteer（同团队，更强大）
+- Chrome-only限制了跨浏览器兼容性测试场景
+- Google可能降低维护优先级（Playwright由前Puppeteer团队创建）
+- 社区新项目更倾向选Playwright而非Puppeteer

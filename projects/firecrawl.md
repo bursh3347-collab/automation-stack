@@ -1,114 +1,87 @@
 # Firecrawl
 
-> The AI-native web scraping engine — turns any URL into LLM-ready markdown with a single API call.
+> AI驱动的Web数据抓取引擎，将网页转换为LLM-ready的Markdown/结构化数据
 
-| Metric | Data |
-|--------|------|
+| 指标 | 数据 |
+|------|------|
 | GitHub | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) |
-| Stars | 109,388 |
-| Forks | 7,005 |
-| License | AGPL-3.0 ⚠️ |
-| Language | TypeScript |
-| Last Update | 2026-04-15 (today) |
-| Created | 2024-04-15 (exactly 2 years ago) |
-| Topics | ai, crawler, llm, markdown, web-scraping |
+| Stars | 109,401 |
+| Forks | 7,006 |
+| License | AGPL-3.0 |
+| 语言 | TypeScript |
+| 最后更新 | 2026-04-15 |
+| Contributors | 200+ |
+| 创建时间 | 2024-04-15 |
 
-## TEMC Score
+## TEMC评分
 
-| Dimension | Score | Rationale |
-|-----------|-------|-----------|
-| T (Tech) | 90 | AI-first design, HTML→Markdown conversion, structured extraction, multiple SDKs (Python/JS/Go/Rust). MCP server support. |
-| E (Ecosystem) | 88 | 109k stars in 2 years = explosive growth. AI community adoption. LangChain/LlamaIndex integrations. |
-| M (Market) | 92 | Perfect timing — every AI app needs web data. LLM-ready output is THE differentiator. MCP support = Agent ecosystem. |
-| C (Combination) | 90 | TypeScript, MCP support, direct integration with AI agent stack. Perfect for天子's AI pipeline. |
-| **Total** | **90** | T×0.25 + E×0.20 + M×0.30 + C×0.25 |
+| 维度 | 分数 | 理由 |
+|------|------|------|
+| T 技术 | 88 | TypeScript+Rust混合，HTML→Markdown转换、结构化数据提取（LLM Extract）、JavaScript渲染、反爬绕过。自托管Docker支持 |
+| E 生态 | 90 | 109k⭐（2年内从0→109k=火箭增长），MCP server官方支持，9种语言SDK，Mendable公司维护 |
+| M 市场 | 92 | AI/LLM数据Pipeline刚需。RAG、Agent、训练数据采集的首选工具。时机窗口完美 |
+| C 组合 | 85 | TypeScript原生，MCP集成，REST API。⚠️但AGPL-3.0限制商业闭源使用（需购买商业许可或自托管） |
+| **综合** | **89** | T×0.25+E×0.20+M×0.30+C×0.25 = 22+18+27.6+21.25 |
 
-## Architecture Analysis
+## 核心价值
+
+解决AI/LLM应用的Web数据获取问题。不是传统爬虫，而是"Web→AI-ready Data"的转换引擎。核心差异化：HTML→clean Markdown + 结构化数据提取 + 反爬绕过。
+
+## 架构亮点
 
 ```
 firecrawl/
 ├── apps/
-│   ├── api/              # Main API server (TypeScript)
-│   │   ├── native/       # Native Rust performance module
-│   │   └── src/          # Core scraping logic
-│   └── js-sdk/           # JavaScript SDK
-├── sdks/                 # Multi-language SDKs
-│   ├── python/
-│   ├── go/
-│   └── rust/
-└── docs/                 # Documentation
+│   ├── api/              ← 主API服务（TypeScript）
+│   ├── rust-sdk/         ← Rust性能模块
+│   ├── python-sdk/       ← Python SDK
+│   ├── js-sdk/           ← JavaScript SDK
+│   └── go-sdk/           ← Go SDK
+├── examples/             ← 使用示例
+├── docker-compose.yaml   ← 自托管配置
+└── SELF_HOST.md          ← 自托管文档
 ```
 
-**Architecture Pattern**: API-first with native Rust performance layer
+**架构模式**：API服务+多SDK+Docker自托管
 
-**Key Design**: URL Input → Browser Rendering → Content Extraction → Markdown/Structured Output — optimized for LLM consumption.
+**核心设计**：
+- **Scrape→Map→Crawl三模式**：单页抓取/站点地图/深度爬取
+- **LLM Extract**：用LLM从页面提取结构化数据（JSON Schema定义）
+- **Markdown转换**：智能清洗HTML→干净Markdown（去导航/广告/噪音）
+- **反爬绕过**：代理轮换+浏览器指纹+Cloudflare bypass
+- **MCP Server**：AI Agent直接调用Web抓取能力
 
-## Core Modules (5)
+## 核心模块（5个）
 
-| Module | Size | Coupling | Description |
-|--------|------|----------|-------------|
-| Scraping Engine | Large | High | Browser rendering + content extraction |
-| Markdown Converter | Medium | Low | HTML → clean Markdown for LLMs |
-| Structured Extraction | Medium | Medium | LLM-powered schema-based extraction |
-| Crawl Orchestrator | Large | Medium | Multi-page crawling, sitemap discovery |
-| MCP Server | Small | Low | Model Context Protocol integration |
+1. **HTML→Markdown引擎** — 核心转换逻辑，去噪+格式化（大）
+2. **LLM Extract** — 结构化数据提取（中）
+3. **Crawl引擎** — 深度爬取+URL发现+并发控制（大）
+4. **反爬系统** — 代理管理+指纹+bypass（中）
+5. **API层** — REST API+认证+速率限制（中）
 
-## Extractable Patterns
+## 可拆解评估
 
-1. **HTML-to-Markdown for LLMs** → `code-base/ai-integration/html-to-markdown/` ⭐通用代码候选
-   - Clean markdown output optimized for token efficiency
-   - Removes nav, ads, boilerplate
+| 模块 | 可独立抽取 | 难度 | 预估时间 |
+|------|-----------|------|----------|
+| HTML→Markdown转换 | ✅ | 需适配(AGPL注意) | 3h |
+| LLM Extract模式 | ✅ | 简单参考思路 | 2h |
+| 反爬策略 | ✅ | 需适配 | 3h |
+| MCP Server模式 | ✅ | 简单参考 | 2h |
 
-2. **Structured Extraction Pattern** → LLM + JSON schema = structured data from any page
-   - Reusable for any "unstructured → structured" AI pipeline
+⭐通用代码候选：HTML→Markdown清洗（code-base/data-extraction/html-to-markdown/）
+⭐通用代码候选：MCP Server集成模式（code-base/ai-integration/mcp-server/）
 
-3. **MCP Server Pattern** → Model Context Protocol server implementation
-   - `code-base/ai-integration/mcp-server/` ⭐通用代码候选
+## 商业价值
 
-4. **Crawl Orchestration** → Sitemap discovery, depth control, rate limiting
+- **痛点级别**：致命（AI应用=数据密集，Web是最大数据源）
+- **TAM**：Web Data Extraction $5B+ / AI Data Pipeline $10B+
+- **竞品**：Crawlee（Apache-2.0）、Jina Reader（开源）、Apify（PaaS）
+- **可商用度**：⚠️ AGPL-3.0=衍生作品必须开源。商业使用需购买许可或纯API调用
+- **差异化窗口**：LLM Extract + MCP = AI Agent原生数据获取层
 
-## Disassembly Assessment
+## 反证（为什么可能不值得用）
 
-| Module | Extractable? | Difficulty | Time |
-|--------|-------------|------------|------|
-| HTML-to-Markdown | ⚠️ AGPL | Need clean-room rewrite | 6h |
-| Structured extraction | ⚠️ AGPL | Concept replicable | 4h |
-| MCP server pattern | ⚠️ AGPL | Pattern study, own impl | 3h |
-| Crawl orchestrator | ⚠️ AGPL | Complex, reference only | 8h |
-
-**⚠️ License Warning**: AGPL-3.0 means derivative works must be open-sourced. For commercial use, either:
-1. Use the hosted API (paid)
-2. Study patterns and clean-room rewrite in TypeScript
-3. Keep self-hosted deployment fully open-source
-
-## Business Value
-
-- **Pain Point**: Every AI app needs clean web data (Critical)
-- **Target Users**: AI developers, RAG pipeline builders, data teams
-- **Competitors**: Crawlee (library), Apify (platform), Jina Reader (API)
-- **Commercialization**: Already commercial (API pricing: $0→$500+/mo)
-- **Differentiation Window**: MCP integration makes it the default for AI agents
-
-## Combination Potential
-
-- **Product**: AI Data Pipeline — Firecrawl extraction → RAG pipeline → SaaS
-- **Sell to**: Companies building AI-powered products needing web data
-- **Price**: Usage-based, $29-199/mo
-- **Combo with Playwright**: Firecrawl for content extraction, Playwright for interactive automation
-- **Combo with n8n**: Firecrawl as data source in n8n workflow automation
-
-## Anti-fragility Assessment
-
-- **Bus Factor**: Mendable/Firecrawl team (10+ contributors) — Medium risk
-- **Dependency Safety**: Rust native module for performance
-- **CI/CD**: Active GitHub Actions
-- **License**: AGPL-3.0 ⚠️ copyleft — commercial use requires caution
-
-## Why It Might NOT Be Worth Using
-
-- AGPL-3.0 license severely limits commercial derivative works
-- Hosted API pricing can get expensive at scale
-- 2 years old — longevity not yet proven
-- Depends on LLM APIs for structured extraction (cost adds up)
-- Competitors like Jina Reader offer similar functionality
-- Self-hosted requires significant infrastructure
+- **AGPL-3.0是最大风险**：任何基于Firecrawl的衍生作品必须开源，限制商业闭源SaaS
+- 109k⭐中大量是AI hype驱动，实际生产使用率待验证
+- 自托管资源消耗较大（需浏览器实例+代理池）
+- Mendable公司商业模式（Cloud API）可能限制开源版功能
