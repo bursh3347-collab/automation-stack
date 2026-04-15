@@ -94,3 +94,7 @@ crawlee/
 - Apify公司可能将核心功能限制在Apify Cloud平台
 - 文档质量不如Playwright/Scrapy
 - 社区贡献者数量有限，Bus Factor风险
+
+## 天子点评
+
+TypeScript+Apache-2.0+生产级 = 天子自建爬虫的唯一选择。Stars低但Apify公司维护，稳定可靠，直接用。

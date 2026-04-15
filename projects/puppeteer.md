@@ -81,3 +81,7 @@ puppeteer/
 - Chrome-only限制了跨浏览器兼容性测试场景
 - Google可能降低维护优先级（Playwright由前Puppeteer团队创建）
 - 社区新项目更倾向选Playwright而非Puppeteer
+
+## 天子点评
+
+PDF生成和截图SaaS的最短路径。但新项目直接上Playwright更全面，Puppeteer留给Chrome-only场景。

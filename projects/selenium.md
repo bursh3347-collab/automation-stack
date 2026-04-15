@@ -84,3 +84,7 @@ selenium/
 - 新项目几乎不选Selenium（Playwright已成事实标准）
 - Java为主，与天子TypeScript栈匹配度极低
 - 学习ROI低：花时间学Selenium不如直接学Playwright
+
+## 天子点评
+
+历史遗产，学习ROI极低。把时间花在Playwright上，回报高100倍。

@@ -86,3 +86,7 @@ scrapy/
 - 不支持JavaScript渲染（需Splash/Playwright额外集成）
 - 架构成熟但创新停滞，社区活力不如新项目
 - 对AI/LLM场景无原生支持（需手动集成）
+
+## 天子点评
+
+Python爬虫标杆，中间件架构值得学习。但Python非天子主栈，实际项目用Crawlee替代，Scrapy作架构参考即可。

@@ -86,3 +86,7 @@ playwright/
 - Browser patches维护成本极高，小团队无法fork维护
 - 对于简单爬虫场景过于重量级（Cheerio/HTTP更轻量）
 - MCP server生态仍在早期，稳定性待验证
+
+## 天子点评
+
+TypeScript原生+Apache-2.0+@playwright/mcp = AI Agent浏览器操控的唯一最优解，天子必学必用，零替代品。

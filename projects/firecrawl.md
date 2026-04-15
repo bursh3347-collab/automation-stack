@@ -85,3 +85,7 @@ firecrawl/
 - 109k⭐中大量是AI hype驱动，实际生产使用率待验证
 - 自托管资源消耗较大（需浏览器实例+代理池）
 - Mendable公司商业模式（Cloud API）可能限制开源版功能
+
+## 天子点评
+
+AI数据采集最热项目，但AGPL-3.0是致命硬伤。学习LLM Extract模式后用Crawlee(Apache-2.0)自建，不要直接fork。
