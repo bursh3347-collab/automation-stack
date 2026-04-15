@@ -1,104 +1,171 @@
-# Web Scraping Architecture Patterns
+# Web Scraping Best Practices
 
-> Best practices extracted from Scrapy, Firecrawl, Crawlee, and Playwright.
+> Universal patterns extracted from Scrapy (61k⭐), Crawlee (23k⭐), Firecrawl (109k⭐), and Playwright (86k⭐).
 
-## Pattern 1: Pipeline Architecture (from Scrapy)
+## 1. Pipeline Architecture (from Scrapy)
 
-Separate your scraping into distinct stages:
-
-```
-URL Queue → Fetcher → Parser → Cleaner → Storage
-    ↑                                    |
-    └────────── New URLs ←──────────────┘
-```
-
-**Why it works**: Each stage can be scaled, tested, and modified independently.
-
-**Implementation tips**:
-- Use a persistent queue (Redis, PostgreSQL) for URLs — survives crashes
-- Deduplicate URLs before adding to queue (hash-based fingerprinting)
-- Process items through a pipeline of transformers (validate → clean → enrich → store)
-
-## Pattern 2: Anti-Bot Strategy Stack (from Crawlee + Firecrawl)
-
-Layer multiple anti-detection strategies:
-
-1. **Proxy Rotation**: Rotate IPs per request or per session
-2. **User-Agent Rotation**: Realistic browser UA strings, rotate per session
-3. **Request Fingerprint Randomization**: Headers order, TLS fingerprint, accept-language
-4. **Session Management**: Maintain cookies across related requests, rotate sessions periodically
-5. **Rate Limiting**: Respect robots.txt, add random delays (1-5s), honor 429 responses
-6. **Browser Fingerprinting**: For Playwright/Puppeteer — stealth plugins, realistic viewport/fonts
-
-## Pattern 3: Content Extraction Pipeline (from Firecrawl)
-
-For AI-ready output:
+Every scraping system should follow a pipeline pattern:
 
 ```
-Raw HTML → Readability → Clean HTML → Markdown → Structured JSON
+URL Input → Request Queue → Downloader → Parser → Item Pipeline → Storage
+              ↑                                          |
+              └── Retry/Failed ──────────────────────────┘
 ```
 
-1. **Readability**: Remove navigation, ads, sidebars (use Mozilla Readability)
-2. **Clean HTML**: Strip scripts, styles, tracking elements
-3. **Markdown Conversion**: Preserve headings, lists, tables, links, code blocks
-4. **Structured Extraction**: Use LLM with JSON schema to extract specific data
+**Why**: Separation of concerns makes each stage independently testable, replaceable, and scalable.
 
-## Pattern 4: Retry with Exponential Backoff (Universal)
+**From Scrapy**: Middleware chains at download and spider levels allow injecting cross-cutting concerns (logging, rate limiting, proxy rotation) without modifying core logic.
+
+## 2. Anti-Bot Strategies (from Crawlee + Scrapy)
+
+### Browser Fingerprint Rotation
+- Rotate User-Agent strings (real browser profiles, not random strings)
+- Randomize viewport size, timezone, language headers
+- Use stealth plugins (playwright-extra-stealth / puppeteer-extra-stealth)
+
+### Request Patterns
+- **Random delays**: 1-5 seconds between requests (not fixed intervals)
+- **Session management**: Maintain cookies per crawl session
+- **Referer chain**: Build realistic referer headers
+- **Accept headers**: Match real browser Accept/Accept-Language/Accept-Encoding
+
+### Proxy Strategy (from Crawlee)
+```typescript
+// Pattern: Session-based proxy assignment
+// Each session gets ONE proxy, rotated on block
+const proxyConfig = {
+  useApifyProxy: true,
+  proxyUrls: ['http://proxy1:8080', 'http://proxy2:8080'],
+  newUrlFunction: (sessionId) => selectProxy(sessionId)
+};
+```
+
+**Key insight from Crawlee**: Assign one proxy per session (not per request). Rotating per-request triggers anti-bot systems faster.
+
+## 3. Content Extraction for AI (from Firecrawl)
+
+### HTML → Markdown Conversion
+The #1 pattern for feeding web data to LLMs:
+
+1. **Remove noise**: Navigation, footers, ads, scripts, styles
+2. **Preserve structure**: Headings, lists, tables, code blocks
+3. **Clean formatting**: Normalize whitespace, fix encoding
+4. **Output markdown**: Token-efficient format for LLMs
 
 ```typescript
-async function fetchWithRetry(url: string, maxRetries = 3): Promise<Response> {
+// Pattern: Extract main content
+function extractMainContent(html: string): string {
+  // 1. Use readability algorithm (Mozilla Readability)
+  // 2. Convert to markdown (turndown)
+  // 3. Clean up excess whitespace
+  // 4. Trim to token budget
+}
+```
+
+### Structured Extraction with LLMs
+```typescript
+// Pattern: Schema-guided extraction
+const schema = z.object({
+  title: z.string(),
+  price: z.number(),
+  features: z.array(z.string())
+});
+
+// Send markdown + schema to LLM → get structured JSON
+```
+
+## 4. Retry with Exponential Backoff (from Scrapy + Crawlee)
+
+```typescript
+// Universal retry pattern
+async function fetchWithRetry(
+  url: string,
+  maxRetries: number = 3,
+  baseDelay: number = 1000
+): Promise<Response> {
   for (let i = 0; i < maxRetries; i++) {
     try {
       const response = await fetch(url);
       if (response.status === 429) {
-        const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
-        await sleep(delay);
+        // Rate limited — wait longer
+        await sleep(baseDelay * Math.pow(2, i) * (1 + Math.random()));
         continue;
       }
-      return response;
+      if (response.ok) return response;
     } catch (error) {
       if (i === maxRetries - 1) throw error;
-      await sleep(Math.pow(2, i) * 1000);
+      await sleep(baseDelay * Math.pow(2, i));
     }
   }
-  throw new Error('Max retries exceeded');
+  throw new Error(`Failed after ${maxRetries} retries`);
 }
 ```
 
-## Pattern 5: Parallel Crawling with Concurrency Control (from Crawlee)
+**Scrapy's insight**: Add jitter (randomness) to backoff to prevent thundering herd.
+**Crawlee's insight**: Track blocked responses and rotate proxy before retrying.
+
+## 5. Concurrency Control (from Scrapy + Crawlee)
 
 ```typescript
-class AutoscaledPool {
-  private concurrency: number;
-  private maxConcurrency: number;
-  private runningTasks: number = 0;
-  
-  async run(tasks: AsyncIterable<() => Promise<void>>) {
-    // Scale concurrency based on:
-    // - CPU usage (reduce if > 80%)
-    // - Memory usage (reduce if > 80%)
-    // - Error rate (reduce if > 10%)
-    // - Success rate (increase if > 95%)
+// Pattern: Adaptive concurrency
+class AdaptiveConcurrency {
+  private currentConcurrency: number;
+  private targetSuccessRate: number = 0.95;
+
+  adjustConcurrency(successRate: number) {
+    if (successRate > this.targetSuccessRate) {
+      // Increase concurrency (things are going well)
+      this.currentConcurrency = Math.min(
+        this.currentConcurrency * 1.1,
+        this.maxConcurrency
+      );
+    } else {
+      // Decrease concurrency (too many failures)
+      this.currentConcurrency = Math.max(
+        this.currentConcurrency * 0.5,
+        this.minConcurrency
+      );
+    }
   }
 }
 ```
 
-## Pattern 6: JavaScript Rendering Decision Tree
+**From Scrapy AutoThrottle**: Measure server response time, automatically adjust request rate.
 
+## 6. Request Deduplication (from Scrapy)
+
+```typescript
+// Pattern: URL fingerprinting for dedup
+function requestFingerprint(url: string, method: string, body?: string): string {
+  const normalized = new URL(url);
+  // Sort query parameters for consistency
+  normalized.searchParams.sort();
+  const canonical = `${method}:${normalized.toString()}:${body || ''}`;
+  return crypto.createHash('sha256').update(canonical).digest('hex');
+}
 ```
-Need JS rendering?
-├── No (static HTML) → Use HTTP client (fastest, cheapest)
-│   └── Tools: Cheerio, BeautifulSoup, node-html-parser
-├── Yes (SPA/dynamic content)
-│   ├── Simple rendering → Headless browser (Playwright)
-│   └── Complex interaction → Full browser with stealth (Playwright + stealth)
-└── Unsure → Try HTTP first, fall back to browser
+
+## 7. Sitemap-First Discovery (from Crawlee + Firecrawl)
+
+```typescript
+// Pattern: Always check sitemap before crawling
+async function discoverUrls(domain: string): Promise<string[]> {
+  // 1. Check robots.txt for sitemap location
+  // 2. Parse sitemap.xml (including sitemap index)
+  // 3. Fall back to link-based crawling if no sitemap
+  // This is 10-100x faster than crawling link-by-link
+}
 ```
 
-## Anti-Patterns to Avoid
+## Summary: When to Use What
 
-1. **No rate limiting** — You'll get IP banned and potentially face legal issues
-2. **Ignoring robots.txt** — Legal risk and ethical concerns
-3. **Storing raw HTML** — Wastes storage; extract and clean immediately
-4. **Single point of failure** — No retry logic, no proxy fallback
-5. **Synchronous scraping** — Always use async/concurrent approaches
+| Pattern | Best Source | Apply When |
+|---------|------------|------------|
+| Pipeline architecture | Scrapy | Building any data extraction system |
+| Anti-bot strategies | Crawlee | Scraping sites with protection |
+| AI content extraction | Firecrawl | Feeding data to LLMs |
+| Browser automation | Playwright | JS-heavy sites, SPAs |
+| Retry + backoff | Universal | Any HTTP client |
+| Adaptive concurrency | Scrapy | High-volume scraping |
+| Request dedup | Scrapy | Large-scale crawling |
+| Sitemap discovery | Crawlee | Starting a new crawl |

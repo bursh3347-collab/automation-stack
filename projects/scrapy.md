@@ -1,56 +1,108 @@
 # Scrapy
 
-> Fast high-level web crawling & scraping framework for Python.
+> The most battle-tested Python web crawling & scraping framework — 16 years of production-grade reliability.
 
 | Metric | Data |
 |--------|------|
 | GitHub | [scrapy/scrapy](https://github.com/scrapy/scrapy) |
-| Stars | 61,333 |
+| Stars | 61,334 |
 | Forks | 11,472 |
-| License | BSD-3-Clause |
+| License | BSD-3-Clause ✅ |
 | Language | Python |
-| Last Update | 2026-04-15 |
-| Contributors | 500+ |
+| Last Update | 2026-04-14 |
+| Latest Version | v2.15.0 (2026-04-09) |
 | Open Issues | 637 |
+| Contributors | 500+ |
 
 ## TEMC Score
 
 | Dimension | Score | Rationale |
 |-----------|-------|-----------|
-| T Tech | 88 | Battle-tested since 2010. Async Twisted engine, middleware pipeline, robust item pipeline. Excellent extensibility via middleware/extensions/signals. |
-| E Ecosystem | 92 | 61k+ stars, massive community, Scrapy Cloud (Zyte), 500+ contributors. De facto Python scraping standard. |
-| M Market | 75 | Mature market, well-established. Not trending upward but steady demand. Python-only limits cross-language adoption. |
-| C Combo | 70 | Python-only (not TypeScript). But patterns (middleware pipeline, item processing) are universally applicable. Data pipeline integration excellent. |
-| **Overall** | **80** | T×0.25 + E×0.20 + M×0.30 + C×0.25 = 80.15 |
+| T (Tech) | 82 | Twisted async engine, middleware pipeline, excellent extensibility. Mature but not cutting-edge. |
+| E (Ecosystem) | 85 | 16-year ecosystem, massive plugin library (scrapy-splash, scrapy-playwright, scrapy-redis). 500+ contributors. |
+| M (Market) | 72 | Mature market, Python-first. Less AI-native than newer tools. Stable demand but not growing fast. |
+| C (Combination) | 70 | Python (not TS), but pipeline architecture patterns are universally reusable. Data extraction feeds AI pipelines. |
+| **Total** | **77** | T×0.25 + E×0.20 + M×0.30 + C×0.25 |
 
-## Core Value
-The gold standard for Python web scraping. Solves large-scale data extraction with built-in rate limiting, retry logic, proxy rotation support, and structured data pipelines.
+## Architecture Analysis
 
-## Architecture Highlights
-- **Engine-Spider-Pipeline Architecture**: Clean separation of crawl logic (Spiders), processing (Item Pipelines), and infrastructure (Engine/Scheduler/Downloader)
-- **Middleware System**: Request/Response middleware chain for proxies, user-agents, cookies, retries
-- **Signals Framework**: Event-driven hooks for monitoring, stats, custom behaviors
-- **Async Twisted Core**: Non-blocking I/O for high concurrency
-- **Selector API**: CSS + XPath unified selector interface
+```
+scrapy/
+├── scrapy/
+│   ├── core/           # Engine, Scheduler, Downloader, Scraper
+│   ├── http/           # Request/Response objects
+│   ├── downloadermiddlewares/  # Retry, redirect, cookies, compression
+│   ├── spidermiddlewares/      # Depth, HTTP error, referer
+│   ├── pipelines/      # Item processing pipeline
+│   ├── extensions/     # Stats, logging, throttle, memory debug
+│   ├── utils/          # URL, decorators, iterators
+│   └── settings/       # Configuration management
+├── docs/               # Sphinx documentation
+└── tests/              # Comprehensive test suite
+```
 
-## Key Modules
-1. **Spider Framework** (Large) — Base spider classes, CrawlSpider with rules, XMLFeedSpider, SitemapSpider
-2. **Item Pipeline** (Medium) — Data validation, cleaning, deduplication, storage adapters
-3. **Downloader Middleware** (Medium) — Proxy rotation, user-agent rotation, retry policies, cookies
-4. **Feed Exporters** (Small) — JSON, CSV, XML, custom format output
-5. **Extensions** (Small) — Stats collection, logging, throttling, memory management
+**Architecture Pattern**: Event-driven pipeline with Twisted reactor
+
+**Key Design**: Engine → Scheduler → Downloader → Spider → Item Pipeline — each stage is pluggable via middleware.
+
+## Core Modules (5)
+
+| Module | Size | Coupling | Description |
+|--------|------|----------|-------------|
+| Engine | Large | High | Orchestrates all components, Twisted reactor |
+| Downloader | Medium | Medium | HTTP client with middleware chain |
+| Spider | Medium | Low | User-defined extraction logic |
+| Item Pipeline | Small | Low | Post-processing, storage, validation |
+| Scheduler | Medium | Medium | Request queue with dedup (fingerprinting) |
 
 ## Extractable Patterns
-- **⭐ Universal Code Candidate: Middleware Pipeline Pattern** → code-base/patterns/middleware-chain/
-- **⭐ Universal Code Candidate: Retry with Exponential Backoff** → code-base/error-handling/retry/
-- Spider-Pipeline separation pattern for any ETL workflow
-- Rate limiting / politeness engine design
 
-## Competitors
-| | Scrapy | Crawlee | Playwright | BeautifulSoup |
-|---|--------|---------|------------|---------------|
-| Language | Python | JS/TS/Python | Multi | Python |
-| JS Rendering | Via Splash | Built-in | Built-in | No |
-| Scale | Excellent | Good | Medium | Small |
-| Learning Curve | Medium | Low | Low | Very Low |
-| Anti-bot | Plugins | Built-in | Stealth mode | None |
+1. **Pipeline Architecture** → `code-base/data-pipeline/pipeline-pattern/` ⭐通用代码候选
+   - Pluggable middleware chain for request/response processing
+   - Item pipeline for data validation → transformation → storage
+
+2. **Request Fingerprinting** → Deduplication via URL + method + body hashing
+   - Extractable as generic dedup strategy for any crawler
+
+3. **Throttle & AutoThrottle** → Adaptive rate limiting based on server response time
+   - Reusable pattern for any API client or scraper
+
+4. **Retry Middleware** → Exponential backoff with configurable retry codes
+
+## Disassembly Assessment
+
+| Module | Extractable? | Difficulty | Time |
+|--------|-------------|------------|------|
+| Pipeline pattern | ✅ Yes | Simple copy → TS adapt | 2h |
+| AutoThrottle | ✅ Yes | Needs adaptation | 3h |
+| Request fingerprinting | ✅ Yes | Simple copy | 1h |
+| Middleware chain | ✅ Yes | Needs TS rewrite | 4h |
+| Twisted engine | ❌ No | Python-specific | N/A |
+
+## Business Value
+
+- **Pain Point**: Reliable large-scale web data extraction (Important)
+- **Target Users**: Data engineers, ML teams, SEO companies
+- **Competitors**: Crawlee ($0-paid via Apify), Firecrawl (API-first), Beautiful Soup (lightweight)
+- **Commercialization**: Not directly SaaS-able; used as infrastructure for data products
+- **Differentiation Window**: AI-powered extraction plugins (scrapy + LLM for structured data)
+
+## Combination Potential
+
+- **Product**: AI Data Pipeline SaaS — Scrapy extraction → LLM structuring → API delivery
+- **Sell to**: Companies needing structured web data for AI training
+- **Price**: $49-199/mo based on pages crawled
+
+## Anti-fragility Assessment
+
+- **Bus Factor**: 3+ core maintainers (wRAR, others) — Medium risk
+- **Dependency Safety**: Twisted is stable but niche
+- **CI/CD**: GitHub Actions, comprehensive test suite
+- **License**: BSD-3-Clause ✅ fully commercial
+
+## Why It Might NOT Be Worth Using
+
+- Python-only, doesn't align with TS base stack
+- Twisted async model is being superseded by asyncio
+- For AI use cases, Firecrawl offers better LLM-ready output out of the box
+- Overkill for simple scraping tasks

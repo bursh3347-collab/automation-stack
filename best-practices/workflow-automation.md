@@ -1,88 +1,138 @@
 # Workflow Automation Best Practices
 
-> Patterns extracted from n8n, Temporal, and modern automation platforms.
+> Patterns extracted from n8n (184k⭐), Crawlee (23k⭐), and Scrapy (61k⭐) pipeline architectures.
 
-## Pattern 1: Event-Driven Workflow Architecture (from n8n)
+## 1. Node/Plugin Architecture (from n8n)
 
-```
-Trigger → Process → Decision → Action → Callback
-   ↑                                      |
-   └──────── Error Handler ←──────────────┘
-```
-
-**Trigger types**:
-- **Webhook**: HTTP POST triggers workflow (most flexible)
-- **Schedule**: Cron-based recurring execution
-- **Polling**: Check external service periodically
-- **Event**: Message queue / pub-sub events
-
-## Pattern 2: Idempotent Workflow Steps
-
-Every step should be safely re-runnable:
+The most powerful pattern for extensible automation:
 
 ```typescript
-async function processOrder(orderId: string) {
-  // Check if already processed (idempotency key)
-  const existing = await db.getProcessingResult(orderId);
-  if (existing) return existing;
-  
-  // Process
-  const result = await doWork(orderId);
-  
-  // Store result with idempotency key
-  await db.saveProcessingResult(orderId, result);
-  return result;
+// Pattern: Self-describing automation node
+interface AutomationNode {
+  name: string;
+  description: string;
+  inputs: NodeInput[];        // What this node accepts
+  outputs: NodeOutput[];      // What this node produces
+  credentials?: Credential[]; // Required auth
+  execute(input: any): Promise<any>;
+}
+
+// Each node is:
+// 1. Self-contained (no external dependencies)
+// 2. Declarative (inputs/outputs/credentials declared upfront)
+// 3. Composable (chain nodes into workflows)
+```
+
+**From n8n**: Every integration is a node. 400+ nodes follow the same pattern. This makes it trivial to add new integrations.
+
+## 2. DAG Execution Engine (from n8n)
+
+```
+[Trigger] → [Node A] → [Branch]
+                          ├── [Node B] → [Node D] → [Output]
+                          └── [Node C] → [Output]
+```
+
+Key principles:
+- **Topological sort**: Execute nodes in dependency order
+- **Parallel branches**: Independent paths execute concurrently
+- **Error propagation**: Errors bubble up with context
+- **Retry per node**: Each node has its own retry policy
+
+## 3. Credential Management (from n8n)
+
+```typescript
+// Pattern: Encrypted credential storage
+interface CredentialStore {
+  // Store encrypted, retrieve decrypted
+  save(name: string, data: Record<string, string>): Promise<void>;
+  get(name: string): Promise<Record<string, string>>;
+  // AES-256-CBC encryption at rest
+  // Decrypt only at execution time
+  // Never log credential values
 }
 ```
 
-## Pattern 3: Error Handling Strategy
+**Critical rule**: Credentials are encrypted at rest, decrypted only during node execution, never logged or exposed in error messages.
 
-```
-Step fails?
-├── Transient error (network, rate limit) → Retry with backoff (max 3)
-├── Data error (invalid input) → Skip + log + notify
-├── System error (service down) → Pause workflow + alert
-└── Unknown error → Retry once → if fails → human review queue
-```
+## 4. Trigger Patterns (from n8n + general)
 
-## Pattern 4: Credential Management (from n8n)
+| Trigger Type | Pattern | Use Case |
+|-------------|---------|----------|
+| **Webhook** | HTTP POST → start workflow | External event (Stripe, GitHub) |
+| **Schedule** | Cron expression → start | Daily reports, periodic checks |
+| **Polling** | Check source every N minutes | APIs without webhooks |
+| **Event** | Message queue → start | Real-time processing |
+| **Manual** | User click → start | Testing, one-off tasks |
 
-- **Encrypt at rest**: AES-256 for stored credentials
-- **Encrypt in transit**: TLS for all API calls
-- **Scope access**: Credentials tied to specific workflows/users
-- **Rotate regularly**: Automated rotation for API keys
-- **Never log**: Redact credentials in all logs
-
-## Pattern 5: Webhook Security
+## 5. Error Handling Strategies
 
 ```typescript
-function verifyWebhook(req: Request, secret: string): boolean {
-  const signature = req.headers['x-signature'];
-  const computed = crypto
-    .createHmac('sha256', secret)
-    .update(req.body)
-    .digest('hex');
-  return crypto.timingSafeEqual(
-    Buffer.from(signature),
-    Buffer.from(computed)
-  );
+// Pattern: Multi-level error handling
+class WorkflowExecutor {
+  async executeNode(node: Node, input: any) {
+    try {
+      return await node.execute(input);
+    } catch (error) {
+      // Level 1: Node-level retry
+      if (node.retryPolicy && attempt < node.maxRetries) {
+        return await this.retryNode(node, input, attempt + 1);
+      }
+      // Level 2: Error output path
+      if (node.errorOutput) {
+        return await this.executeNode(node.errorOutput, { error, input });
+      }
+      // Level 3: Workflow-level error handler
+      return await this.handleWorkflowError(error, node);
+    }
+  }
 }
 ```
 
-## Pattern 6: AI Agent Workflow Integration (from n8n AI nodes)
+## 6. Idempotency (Critical for Automation)
 
-Modern workflow automation increasingly integrates AI agents:
+```typescript
+// Pattern: Every automation step should be idempotent
+// Running it twice produces the same result
 
-1. **LLM Decision Node**: Use AI to make routing decisions in workflows
-2. **Tool Calling**: Workflow steps as tools available to AI agents
-3. **Memory Integration**: Persist conversation context across workflow runs
-4. **Human-in-the-Loop**: AI processes → human review → AI continues
+// ❌ Bad: Creates duplicate entries
+await db.insert({ name: 'John', email: 'john@example.com' });
 
-## Automation Anti-Patterns
+// ✅ Good: Upsert with unique key
+await db.upsert(
+  { email: 'john@example.com' },
+  { name: 'John', email: 'john@example.com' }
+);
+```
 
-1. **No error handling** — Silent failures corrupt data
-2. **Tight coupling** — Steps directly call each other instead of using events
-3. **No observability** — Can't debug failed workflows
-4. **Hardcoded credentials** — Security nightmare
-5. **No rate limiting** — Overwhelm downstream services
-6. **No idempotency** — Duplicate processing on retries
+**Why**: Automation workflows WILL fail mid-execution. When you retry, you don't want duplicate records, double charges, or repeated notifications.
+
+## 7. Observability (from n8n + production patterns)
+
+```typescript
+// Pattern: Every workflow execution should be traceable
+interface ExecutionLog {
+  workflowId: string;
+  executionId: string;  // Unique per run
+  startedAt: Date;
+  completedAt: Date;
+  status: 'success' | 'error' | 'timeout';
+  nodes: {
+    nodeId: string;
+    input: any;         // Sanitized (no credentials)
+    output: any;
+    duration: number;
+    error?: string;
+  }[];
+}
+```
+
+## Summary: Automation Architecture Principles
+
+1. **Everything is a node** — Self-contained, composable units
+2. **Fail gracefully** — Multi-level error handling + retries
+3. **Be idempotent** — Safe to retry any step
+4. **Encrypt credentials** — At rest and in transit
+5. **Log everything** — But sanitize sensitive data
+6. **Design for retry** — Assume any step can fail
+7. **Separate triggers from logic** — Many triggers, same workflow

@@ -1,54 +1,108 @@
 # Playwright
 
-> Framework for Web Testing and Automation — test Chromium, Firefox and WebKit with a single API.
+> Microsoft's cross-browser automation framework — the modern standard for browser testing and scraping.
 
 | Metric | Data |
 |--------|------|
 | GitHub | [microsoft/playwright](https://github.com/microsoft/playwright) |
-| Stars | 86,505 |
-| Forks | 5,505 |
-| License | Apache-2.0 |
+| Stars | ~86,500 |
+| Forks | ~4,500 |
+| License | Apache-2.0 ✅ |
 | Language | TypeScript |
-| Last Update | 2026-04-15 |
+| Last Update | 2026-04-15 (today) |
 | Contributors | 500+ |
-| Open Issues | 626 |
+| npm Weekly | 10M+ downloads |
 
 ## TEMC Score
 
 | Dimension | Score | Rationale |
 |-----------|-------|-----------|
-| T Tech | 92 | Auto-wait, network interception, multi-browser, codegen, trace viewer. TypeScript-first with Python/Java/C# bindings. Production-grade from Microsoft. |
-| E Ecosystem | 90 | 86k stars, Microsoft-backed, rapid growth. Strong VS Code integration. Active community and enterprise adoption. |
-| M Market | 85 | Replacing Selenium as testing standard. Growing automation use cases beyond testing. |
-| C Combo | 88 | TypeScript native = perfect stack match. Headless browser for AI scraping, testing, automation. Direct integration with Next.js testing. |
-| **Overall** | **88** | T×0.25 + E×0.20 + M×0.30 + C×0.25 = 88.0 |
+| T (Tech) | 92 | Cross-browser (Chromium/Firefox/WebKit), codegen, trace viewer, auto-wait, TypeScript-native. Best-in-class API design. |
+| E (Ecosystem) | 90 | Microsoft-backed, massive enterprise adoption, VS Code integration, Playwright Test runner. .claude directory = AI-friendly. |
+| M (Market) | 85 | Dominant in E2E testing, growing in AI agent browser control and scraping. |
+| C (Combination) | 88 | TypeScript-native, Apache-2.0, perfect match for AI agent browser automation. Direct integration with AI stack. |
+| **Total** | **88** | T×0.25 + E×0.20 + M×0.30 + C×0.25 |
 
-## Core Value
-The modern standard for browser automation. Single API across Chromium, Firefox, WebKit. Auto-waiting eliminates flaky tests. Network interception enables API mocking.
+## Architecture Analysis
 
-## Architecture Highlights
-- **Browser Context Isolation**: Each test gets fresh browser context (cookies, storage, permissions)
-- **Auto-Wait Engine**: Automatically waits for elements to be actionable before performing actions
-- **Network Interception Layer**: Mock APIs, modify requests/responses, record HAR files
-- **Codegen Tool**: Record user interactions → generate test code automatically
-- **Trace Viewer**: Time-travel debugging with DOM snapshots, network logs, console output
-- **Multi-language Bindings**: TypeScript/JavaScript, Python, Java, C# — all from single codebase
+```
+playwright/
+├── packages/
+│   ├── playwright-core/    # Core browser automation protocol
+│   ├── playwright/         # Main package with browser downloads
+│   ├── playwright-test/    # Test runner framework
+│   ├── trace-viewer/       # Debugging trace UI
+│   └── html-reporter/      # Test report generation
+├── browser_patches/        # Custom browser patches for automation
+├── docs/                   # Documentation
+├── tests/                  # Comprehensive test suite
+└── utils/                  # Build and development utilities
+```
 
-## Key Modules
-1. **Browser Engine Abstraction** (Large) — Unified API across Chromium/Firefox/WebKit via CDP/proprietary protocols
-2. **Page & Locator API** (Large) — Element selection, actions, assertions with auto-waiting
-3. **Network Layer** (Medium) — Request interception, response mocking, HAR recording
-4. **Test Runner** (Medium) — Parallel execution, fixtures, annotations, HTML reporter
-5. **Codegen & Trace** (Small) — Recording, playback, time-travel debugging
+**Architecture Pattern**: Monorepo with clean package boundaries
+
+**Key Design**: Browser Protocol Layer → Page/Context API → Actions/Assertions — each layer abstracts the one below.
+
+## Core Modules (5)
+
+| Module | Size | Coupling | Description |
+|--------|------|----------|-------------|
+| playwright-core | Large | Medium | CDP/BiDi protocol, browser connection |
+| Page API | Large | Medium | Navigation, selectors, actions, screenshots |
+| Auto-wait | Small | Low | Intelligent element waiting, no flaky tests |
+| Codegen | Medium | Low | Record user actions → generate test code |
+| Trace Viewer | Medium | Low | Visual debugging with snapshots |
 
 ## Extractable Patterns
-- **⭐ Universal Code Candidate: Browser Automation Wrapper** → code-base/automation/browser/
-- **⭐ Universal Code Candidate: Network Interception Pattern** → code-base/testing/api-mocking/
-- Auto-wait pattern for robust UI automation
-- Browser context isolation for parallel testing
-- Page Object Model implementation
 
-## Why This Matters for Tianzi
-- **Direct stack match**: TypeScript native, integrates with Next.js testing
-- **AI scraping backbone**: Headless browser for LLM-ready data extraction (pairs with Firecrawl)
-- **SaaS testing**: E2E testing for any Micro SaaS product
+1. **Auto-wait Pattern** → `code-base/browser-automation/auto-wait/` ⭐通用代码候选
+   - Intelligent waiting for elements to be actionable
+   - Eliminates explicit sleep/wait calls
+
+2. **Browser Context Isolation** → Each test gets fresh context (cookies, storage)
+   - Reusable pattern for parallel scraping sessions
+
+3. **Selector Engine** → CSS, XPath, text, role, test-id selectors
+   - Unified selector strategy applicable to any browser tool
+
+4. **Screenshot/PDF Generation** → Full-page, element, viewport screenshots
+   - Extractable as standalone screenshot service
+
+## Disassembly Assessment
+
+| Module | Extractable? | Difficulty | Time |
+|--------|-------------|------------|------|
+| Auto-wait pattern | ✅ Yes | Concept extraction | 1h |
+| Context isolation | ✅ Yes | Pattern documentation | 1h |
+| Screenshot service | ✅ Yes | Simple wrapper | 2h |
+| Codegen approach | ⚠️ Partial | Complex, needs adaptation | 8h |
+| Browser patches | ❌ No | Microsoft-specific | N/A |
+
+## Business Value
+
+- **Pain Point**: Reliable cross-browser testing + AI browser automation (Critical)
+- **Target Users**: QA teams, AI agent developers, scraping companies
+- **Competitors**: Puppeteer (Chrome-only), Selenium (verbose), Cypress (testing-only)
+- **Commercialization**: Foundation for browser-based AI agents, testing SaaS
+- **Differentiation Window**: AI agent browser control (Playwright + LLM = autonomous web agent)
+
+## Combination Potential
+
+- **Product**: AI Browser Agent SaaS — Playwright + LLM for autonomous web tasks
+- **Sell to**: Companies needing web automation (data entry, monitoring, testing)
+- **Price**: $29-99/mo per agent
+- **Combo with Firecrawl**: Playwright handles JS-heavy pages, Firecrawl handles static + API
+
+## Anti-fragility Assessment
+
+- **Bus Factor**: Microsoft team (10+ active maintainers) — Low risk ✅
+- **Dependency Safety**: Self-contained, custom browser binaries
+- **CI/CD**: Comprehensive GitHub Actions, cross-platform testing
+- **License**: Apache-2.0 ✅ fully commercial
+
+## Why It Might NOT Be Worth Using
+
+- Heavy resource usage (downloads browsers ~500MB+)
+- Overkill for simple HTTP scraping (use Cheerio/Firecrawl instead)
+- Microsoft could deprioritize (unlikely given adoption)
+- Learning curve for advanced features (network interception, browser contexts)

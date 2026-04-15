@@ -1,50 +1,79 @@
-# Automation & Web Scraping Tools — Comparison
+# Automation & Web Scraping — Full Comparison
 
-> Last updated: 2026-04-15
+Last updated: 2026-04-15
 
-## Overview Matrix
+## Quick Comparison Table
 
-| Project | Stars | Language | License | Type | TEMC | Best For |
-|---------|-------|----------|---------|------|------|----------|
-| **Puppeteer** | 94k | TypeScript | Apache-2.0 | Browser Automation | 80 | Chrome-specific automation |
-| **Playwright** | 86k | TypeScript | Apache-2.0 | Browser Automation | **88** | Modern cross-browser testing & automation |
-| **Firecrawl** | ~70k | TypeScript | AGPL-3.0 | AI Web Scraping | **89** | LLM-ready web data extraction |
-| **Scrapy** | 61k | Python | BSD-3 | Web Scraping | 80 | Large-scale Python scraping |
-| **n8n** | ~60k | TypeScript | Fair-code | Workflow Automation | **85** | Visual workflow & AI agent orchestration |
-| **Selenium** | 32k | Java | Apache-2.0 | Browser Automation | 67 | Legacy enterprise testing |
-| **Crawlee** | 17k | TypeScript | Apache-2.0 | Web Scraping | 81 | Reliable TypeScript crawling |
+| Feature | Firecrawl | Playwright | n8n | Crawlee | Scrapy | Puppeteer | Selenium |
+|---------|-----------|------------|-----|---------|--------|-----------|----------|
+| **TEMC Score** | **90** 🏆 | **88** | **86** | **83** | **77** | **80** | **67** |
+| **Stars** | 109k | 86k | 184k | 23k | 61k | 94k | 34k |
+| **Language** | TypeScript | TypeScript | TypeScript | TypeScript | Python | TypeScript | Java (multi) |
+| **License** | AGPL-3.0 ⚠️ | Apache-2.0 ✅ | Fair-code ⚠️ | Apache-2.0 ✅ | BSD-3 ✅ | Apache-2.0 ✅ | Apache-2.0 ✅ |
+| **Primary Use** | AI scraping | Browser automation | Workflow automation | Reliable crawling | Python scraping | Chrome automation | Cross-browser testing |
+| **AI-Native** | ✅ Yes | ❌ No (but AI-compatible) | ✅ Yes (LangChain nodes) | ❌ No | ❌ No | ❌ No | ❌ No |
+| **MCP Support** | ✅ Server | ❌ No | ✅ Client+Server | ❌ No | ❌ No | ❌ No | ❌ No |
+| **Anti-blocking** | Built-in | Manual | Via nodes | Built-in | Middleware | Manual | Manual |
+| **Proxy Rotation** | Built-in | Manual | Via nodes | Built-in | Middleware | Manual | Manual |
+| **Headless Browser** | Yes | Yes (3 engines) | Via nodes | Yes (PW/PP) | Via scrapy-playwright | Yes (Chrome) | Yes (multi) |
+| **Commercial Friendly** | ⚠️ AGPL | ✅ | ⚠️ Fair-code | ✅ | ✅ | ✅ | ✅ |
+| **Best For** | AI data pipelines | Testing + automation | Business workflows | TS web crawling | Python data extraction | Chrome-specific tasks | Enterprise legacy |
 
-## Category Breakdown
+## Decision Matrix: Which Tool to Use?
 
-### 🌐 Browser Automation
-| | Playwright | Puppeteer | Selenium |
-|---|-----------|-----------|----------|
-| Multi-browser | ✅ Chrome+FF+WebKit | ⚠️ Chrome+FF | ✅ All browsers |
-| Auto-wait | ✅ Built-in | ❌ Manual | ❌ Manual |
-| TypeScript | ✅ Native | ✅ Native | ⚠️ Bindings |
-| Trace/Debug | ✅ Trace Viewer | ❌ | ❌ |
-| Distributed | ⚠️ Via sharding | ❌ | ✅ Grid |
-| **Verdict** | 🏆 **Modern choice** | Good for Chrome | Legacy |
+### By Use Case
 
-### 🕷️ Web Scraping
-| | Firecrawl | Crawlee | Scrapy |
-|---|-----------|---------|--------|
-| Language | TypeScript | TypeScript | Python |
-| AI-Ready Output | ✅ Markdown/JSON | ❌ | ❌ |
-| Anti-Bot | ✅ Built-in | ✅ Built-in | ⚠️ Plugins |
-| JS Rendering | ✅ Playwright | ✅ Playwright/Puppeteer | ⚠️ Splash |
-| MCP Integration | ✅ | ❌ | ❌ |
-| Scale | Cloud API | Self-host | Self-host |
-| **Verdict** | 🏆 **For AI pipelines** | Best TS crawler | Best Python crawler |
+| Use Case | Recommended | Runner-up | Why |
+|----------|-------------|-----------|-----|
+| **AI data extraction** | Firecrawl | Crawlee + LLM | LLM-ready markdown output |
+| **E2E testing** | Playwright | Selenium | Cross-browser, auto-wait, modern API |
+| **Browser automation** | Playwright | Puppeteer | Cross-browser, better API |
+| **Business workflow automation** | n8n | Custom code | Visual builder, 400+ integrations |
+| **Large-scale Python crawling** | Scrapy | Crawlee | 16 years proven, pipeline architecture |
+| **TypeScript web crawling** | Crawlee | Playwright + custom | Built-in proxy, retry, storage |
+| **Chrome-specific automation** | Puppeteer | Playwright | Native CDP access |
+| **Enterprise cross-browser** | Selenium | Playwright | W3C standard, multi-language |
+| **AI agent browser control** | Playwright | Puppeteer | Context isolation, TypeScript |
 
-### ⚡ Workflow Automation
-n8n stands alone in this category as the open-source workflow automation platform. Competes with Zapier, Make, and Temporal in different segments.
+### By Tech Stack
 
-## Recommendation for Tianzi (TypeScript + Next.js + AI)
+| Your Stack | Best Choice | Why |
+|------------|------------|-----|
+| TypeScript / Next.js | **Crawlee** or **Playwright** | Native TS, Apache-2.0 |
+| Python / FastAPI | **Scrapy** | Python-native, mature ecosystem |
+| AI / LLM pipeline | **Firecrawl** | LLM-ready output, MCP support |
+| No-code / low-code | **n8n** | Visual builder, AI nodes |
+| Enterprise Java | **Selenium** | W3C standard, multi-language |
 
-1. **Firecrawl** (TEMC 89) — #1 pick. AI-native scraping, TypeScript, MCP integration. Use API for production, reference code for patterns.
-2. **Playwright** (TEMC 88) — #2 pick. Browser automation backbone. Testing + scraping. Perfect stack match.
-3. **n8n** (TEMC 85) — #3 pick. Workflow automation reference. AI agent orchestration patterns.
-4. **Crawlee** (TEMC 81) — Good alternative to Firecrawl for self-hosted TypeScript scraping.
-5. **Scrapy/Puppeteer** (TEMC 80) — Learn patterns, but not primary tools for TypeScript stack.
-6. **Selenium** (TEMC 67) — Legacy. Skip unless working with enterprise Java.
+## TEMC Score Breakdown
+
+| Project | T (Tech) | E (Ecosystem) | M (Market) | C (Combination) | **Total** |
+|---------|----------|----------------|------------|------------------|-----------|
+| Firecrawl | 90 | 88 | 92 | 90 | **90** |
+| Playwright | 92 | 90 | 85 | 88 | **88** |
+| n8n | 88 | 92 | 85 | 82 | **86** |
+| Crawlee | 85 | 78 | 82 | 85 | **83** |
+| Puppeteer | 82 | 88 | 72 | 78 | **80** |
+| Scrapy | 82 | 85 | 72 | 70 | **77** |
+| Selenium | 75 | 82 | 60 | 55 | **67** |
+
+## License Risk Matrix
+
+| License | Projects | Commercial Use | Derivative Works | Risk Level |
+|---------|----------|---------------|-------------------|------------|
+| Apache-2.0 | Playwright, Crawlee, Puppeteer, Selenium | ✅ Free | ✅ Free | 🟢 Safe |
+| BSD-3-Clause | Scrapy | ✅ Free | ✅ Free | 🟢 Safe |
+| AGPL-3.0 | Firecrawl | ⚠️ Must open-source | ⚠️ Must open-source | 🟡 Caution |
+| Fair-code | n8n | ⚠️ Can't compete | ⚠️ Can't redistribute | 🟡 Caution |
+
+## Growth Trends
+
+| Project | Age | Stars/Year | Trajectory | Signal |
+|---------|-----|-----------|------------|--------|
+| Firecrawl | 2 years | ~55k/yr | 🚀 Explosive | AI demand driving adoption |
+| n8n | 7 years | ~26k/yr | 🚀 Accelerating | AI features boosting growth |
+| Playwright | 6 years | ~14k/yr | ↑ Strong | Replacing Puppeteer/Selenium |
+| Crawlee | 10 years | ~2.3k/yr | ↑ Steady | Niche but loyal community |
+| Puppeteer | 9 years | ~10k/yr | → Flat | Legacy growth, new users go Playwright |
+| Scrapy | 16 years | ~3.8k/yr | → Stable | Mature, steady Python demand |
+| Selenium | 13 years | ~2.6k/yr | ↓ Declining | Legacy, being replaced |
