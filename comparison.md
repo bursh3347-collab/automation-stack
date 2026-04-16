@@ -1,6 +1,6 @@
-# 🔄 Automation & Scraping Stack — 横向对比表
+# 🔄 Automation & Workflow Stack — 横向对比表
 
-> 7个TOP项目全方位对比，帮你快速选型
+> 12个TOP项目全方位对比，帮你快速选型
 
 ## 综合评分排名
 
@@ -9,73 +9,89 @@
 | 1 | **Playwright** | 86.5k | **90** | 92 | 90 | 88 | 90 | Apache-2.0 |
 | 2 | **Firecrawl** | 109k | **89** | 88 | 90 | 92 | 85 | ⚠️ AGPL-3.0 |
 | 3 | **n8n** | 184k | **89** | 88 | 95 | 90 | 82 | ⚠️ Fair-code |
-| 4 | **Crawlee** | 22.8k | **83** | 85 | 75 | 82 | 88 | Apache-2.0 |
-| 5 | **Puppeteer** | 90k | **82** | 85 | 88 | 75 | 82 | Apache-2.0 |
-| 6 | **Scrapy** | 61.3k | **74** | 78 | 85 | 65 | 70 | BSD-3 |
-| 7 | **Selenium** | 34k | **67** | 75 | 82 | 60 | 55 | Apache-2.0 |
+| 4 | **Activepieces** | 21.7k | **85** | 85 | 80 | 88 | 85 | ✅ MIT |
+| 5 | **Crawlee** | 22.8k | **83** | 85 | 75 | 82 | 88 | Apache-2.0 |
+| 6 | **Temporal** | 19.6k | **82** | 92 | 82 | 85 | 70 | MIT |
+| 7 | **Puppeteer** | 90k | **82** | 85 | 88 | 75 | 82 | Apache-2.0 |
+| 8 | **Inngest** | 5.2k | **82** | 88 | 68 | 85 | 85 | BSL-like |
+| 9 | **Windmill** | 16.2k | **82** | 90 | 75 | 82 | 78 | ⚠️ AGPL-3.0 |
+| 10 | **Scrapy** | 61.3k | **74** | 78 | 85 | 65 | 70 | BSD-3 |
+| 11 | **Selenium** | 34k | **67** | 75 | 82 | 60 | 55 | Apache-2.0 |
+| 12 | **Huginn** | 49.1k | **63** | 65 | 85 | 58 | 50 | MIT |
 
 ## 按使用场景推荐
 
 ### 🤖 AI Agent 浏览器操控
 **首选：Playwright** → auto-wait + @playwright/mcp = AI Agent直接操控浏览器
-备选：Puppeteer（Chrome-only场景）
 
 ### 📊 AI/LLM 数据采集
 **首选：Firecrawl** → HTML→Markdown + LLM Extract = AI-ready数据
-备选：Crawlee（需要Apache-2.0许可时）
+
+### ⚙️ 工作流自动化（可嵌入SaaS）
+**首选：Activepieces** → MIT license + 400+ MCP servers + AI Agent native
+
+### ⚙️ 工作流自动化（自托管基建）
+**首选：n8n** → 184k stars + 400+集成 + AI节点 + 可视化编排
+
+### 🔧 高性能脚本→API/UI
+**首选：Windmill** → Rust引擎13x Airflow + 多语言脚本 + 自动生成UI
+
+### 📦 SaaS后台任务（Serverless）
+**首选：Inngest** → 零基础设施 + Vercel原生 + TypeScript step functions
+
+### 🏗️ 关键业务工作流（大规模）
+**首选：Temporal** → 持久执行 + 自动重试 + 事件溯源 + 企业级
 
 ### 🕷️ 大规模结构化爬虫
 **首选：Crawlee**（TypeScript项目）/ **Scrapy**（Python项目）
-备选：Firecrawl（API模式调用）
-
-### ⚙️ 工作流自动化
-**首选：n8n** → 400+集成 + AI节点 + 可视化编排
-备选：自研webhook + Playwright（轻量场景）
 
 ### 🧪 E2E测试
 **首选：Playwright** → 跨浏览器 + auto-wait + trace viewer
-备选：Cypress（前端专用）
-
-### 📄 PDF生成/截图服务
-**首选：Puppeteer** → Chrome原生PDF/截图能力最强
-备选：Playwright
 
 ## 技术栈对比
 
-| 特性 | Playwright | Firecrawl | n8n | Crawlee | Puppeteer | Scrapy | Selenium |
-|------|-----------|-----------|-----|---------|-----------|--------|----------|
-| **语言** | TypeScript | TypeScript | TypeScript | TypeScript | TypeScript | Python | Java(多语言) |
-| **JS渲染** | ✅ 多浏览器 | ✅ 内置 | ⚠️ 需集成 | ✅ 多引擎 | ✅ Chrome | ❌ 需Splash | ✅ WebDriver |
-| **Auto-wait** | ✅ | N/A | N/A | ⚠️ 部分 | ❌ | N/A | ❌ |
-| **MCP支持** | ✅ 官方 | ✅ 官方 | ✅ 双向 | ❌ | ❌ | ❌ | ❌ |
-| **代理轮换** | ⚠️ 手动 | ✅ 内置 | ⚠️ 需节点 | ✅ 自动 | ⚠️ 手动 | ✅ 中间件 | ⚠️ 手动 |
-| **分布式** | ❌ | ✅ API | ✅ Worker | ✅ Apify Cloud | ❌ | ✅ Scrapy Cloud | ✅ Grid |
-| **AI集成** | ⚠️ MCP | ✅ 原生 | ✅ AI节点 | ❌ | ❌ | ❌ | ❌ |
-| **自托管** | N/A | ✅ Docker | ✅ Docker | ✅ Docker | N/A | ✅ | ✅ Grid |
+| 特性 | Activepieces | Windmill | Huginn | Temporal | Inngest |
+|------|-------------|----------|--------|----------|---------|
+| **语言** | TypeScript | Rust+Svelte | Ruby | Go | Go+TS SDK |
+| **基栈匹配** | 🟢 高 | 🟡 中 | 🔴 低 | 🟡 中(SDK) | 🟢 高 |
+| **AI/MCP** | ✅ 原生 | ⚠️ 部分 | ❌ | ❌ | ⚠️ 可集成 |
+| **自托管** | ✅ Docker | ✅ Docker | ✅ Docker | ✅ (复杂) | ✅ (可选Cloud) |
+| **Serverless** | ❌ | ❌ | ❌ | ❌ | ✅ 原生 |
+| **持久执行** | ⚠️ 部分 | ✅ | ❌ | ✅ 完整 | ✅ Steps |
+| **可视化** | ✅ 编排器 | ✅ UI生成 | ✅ 基础 | ❌ (Web UI) | ❌ (Dev Server) |
+| **免费tier** | ✅ 自托管 | ✅ 自托管 | ✅ 自托管 | ❌ | ✅ 5k events/mo |
 
 ## License 风险矩阵
 
-| 项目 | License | 商业闭源SaaS | 内部使用 | 修改后分发 | 风险等级 |
-|------|---------|-------------|---------|-----------|----------|
-| Playwright | Apache-2.0 | ✅ | ✅ | ✅ | 🟢 低 |
-| Puppeteer | Apache-2.0 | ✅ | ✅ | ✅ | 🟢 低 |
-| Crawlee | Apache-2.0 | ✅ | ✅ | ✅ | 🟢 低 |
-| Selenium | Apache-2.0 | ✅ | ✅ | ✅ | 🟢 低 |
-| Scrapy | BSD-3 | ✅ | ✅ | ✅ | 🟢 低 |
-| n8n | Fair-code | ⚠️ 不可竞品 | ✅ | ⚠️ 限制 | 🟡 中 |
-| Firecrawl | AGPL-3.0 | ❌ 需商业许可 | ⚠️ 衍生需开源 | ❌ 必须开源 | 🔴 高 |
+| 项目 | License | 商业闭源SaaS | 嵌入产品 | 风险等级 |
+|------|---------|-------------|---------|----------|
+| Playwright | Apache-2.0 | ✅ | ✅ | 🟢 低 |
+| Puppeteer | Apache-2.0 | ✅ | ✅ | 🟢 低 |
+| Crawlee | Apache-2.0 | ✅ | ✅ | 🟢 低 |
+| Selenium | Apache-2.0 | ✅ | ✅ | 🟢 低 |
+| Scrapy | BSD-3 | ✅ | ✅ | 🟢 低 |
+| Temporal | MIT | ✅ | ✅ | 🟢 低 |
+| Huginn | MIT | ✅ | ✅ | 🟢 低 |
+| **Activepieces** | **MIT (core)** | **✅** | **✅** | **🟢 低** |
+| Inngest | BSL-like | ⚠️ 限制 | ✅ SDK | 🟡 中 |
+| n8n | Fair-code | ⚠️ 不可竞品 | ⚠️ | 🟡 中 |
+| Windmill | AGPL-3.0 | ❌ 需商业许可 | ❌ | 🔴 高 |
+| Firecrawl | AGPL-3.0 | ❌ 需商业许可 | ❌ | 🔴 高 |
 
-## 天子选型建议
-
-基于天子基准技术栈（TypeScript + Next.js + Supabase + Vercel）：
+## 天子选型建议（2026 Solo Dev SaaS）
 
 1. **必装**：Playwright（测试+AI Agent浏览器操控）
-2. **强烈推荐**：Crawlee（TypeScript原生+Apache-2.0=最佳爬虫选择）
-3. **推荐**：n8n（自托管工作流自动化，一人公司基础设施）
-4. **按需**：Firecrawl（AI数据采集API调用模式，规避AGPL）
-5. **了解**：Puppeteer（Chrome特定场景，如PDF生成SaaS）
-6. **参考**：Scrapy（Python数据管道，架构模式可借鉴）
-7. **跳过**：Selenium（已被Playwright全面替代）
+2. **必装**：Inngest（SaaS后台任务，零基础设施，Vercel原生）
+3. **强烈推荐**：Activepieces（可嵌入SaaS的自动化引擎，MIT）
+4. **强烈推荐**：Crawlee（TypeScript原生+Apache-2.0=最佳爬虫选择）
+5. **推荐**：n8n（自托管工作流自动化，一人公司基础设施）
+6. **按需**：Firecrawl（AI数据采集API调用模式，规避AGPL）
+7. **规模后**：Temporal（关键业务工作流，需要时再上）
+8. **内部工具**：Windmill（高性能脚本平台，内部用AGPL无碍）
+9. **参考**：Puppeteer（Chrome特定场景，如PDF生成SaaS）
+10. **历史参考**：Huginn（Agent设计模式的鼻祖，概念学习）
+11. **参考**：Scrapy（Python数据管道，架构模式可借鉴）
+12. **跳过**：Selenium（已被Playwright全面替代）
 
 ---
-*最后更新：2026-04-15 | TEMC评分体系 by 天工·代码猎手*
+*最后更新：2026-04-16 | TEMC评分体系 by 天工·内阁首辅*
